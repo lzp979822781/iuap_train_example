@@ -6,12 +6,14 @@ import moment from 'moment';
 // 处理url参数
 import queryString from "query-string";
 // grid中引入的组件
-import {Tooltip, Dropdown, Menu, Icon} from 'tinper-bee';
+import {Tooltip, Dropdown, Menu, Icon, Loading} from 'tinper-bee';
 import Grid from 'components/Grid';
 // 页面head,封装与公共组件中
 import Header from 'components/Header';
 //导入模态框，模态框组件封装在公共组件下
 import PopDialog from 'components/Pop';
+// 导入搜索区组件
+import SearchArea from '../SearchArea';
 
 // 封装的工具类
 import {deepClone, getSortMap} from "utils";
@@ -221,7 +223,7 @@ class Query extends Component {
 
     render() {
         const _this = this;
-        const {queryObj} = _this.props;
+        const {queryObj, showLoading, queryParam} = _this.props;
         const {filterable, record} = _this.state;
         const column = [
             {
@@ -332,7 +334,7 @@ class Query extends Component {
                     step: 1,
                     precision: 0
                 },
-                // sorter: (a, b) => a.serviceYears - b.serviceYears,
+                sorter: (a, b) => a.serviceYears - b.serviceYears,
             },
             {
                 title: "司龄",
@@ -449,8 +451,15 @@ class Query extends Component {
 
         return (
             <div className='single-table-query'>
+                {/* 加载进度条 */}
+                <Loading showBackDrop={true} loadingType="line" show={showLoading} fullScreen={true}/>
                 {/* 页面头部 */}
                 <Header title='A1单表查询示例'/>
+                <SearchArea
+                    queryParam={queryParam}
+                    clearRowFilter={this.clearRowFilter}
+                    onCallback={this.resetTableHeight}
+                />
                 {/* 表格区域 */}
                 <div className="gird-parent">
                     <Grid

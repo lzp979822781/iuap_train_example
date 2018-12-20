@@ -9,6 +9,7 @@ export default {
     name: "query",
     // 设置当前 Model 所需的初始化 state
     initialState: {
+        showLoading: false,
         queryParam: {
             pageParams: {
                 pageIndex: 0,
