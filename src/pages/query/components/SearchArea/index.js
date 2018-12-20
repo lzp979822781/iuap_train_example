@@ -45,7 +45,8 @@ class SearchAreaForm extends Component {
         if (values.year) {
             values.year = values.year.format('YYYY');
         }
-        // 参照特殊处理
+        // 参照特殊处理部门参照返回的数据为"{"refname":"煙台華新冷精生產二//科（江陰合金）","refpk":"c8348fc0-d4e1-4954-acff-ebcd894b3ff1"}"
+        // 后台存的值为以','分隔的refpk组成的字符串
         const {dept} = values;
         if (dept) {
             const {refpk} = JSON.parse(dept);
@@ -55,12 +56,17 @@ class SearchAreaForm extends Component {
         let queryParam = deepClone(this.props.queryParam);
         let {pageParams} = queryParam;
         pageParams.pageIndex = 0;
-
+        /* 
+         *   getSearchPanel方法删除空的搜索条件，并对特殊字段的查询条件进行了处理
+         *   精确查询condition为EQ,大于等于查询为GTEQ
+         */
         const arrayNew = this.getSearchPanel(values); //对搜索条件拼接
-        queryParam.whereParams=arrayNew;
 
+        queryParam.whereParams=arrayNew;
+        // 将当前查询条件缓存到model.js中的cacheFilter字段中备用
         actions.query.updateState({cacheFilter: arrayNew});  //缓存查询条件
         actions.query.loadList(queryParam);
+        //点击搜索面板的时候，关闭过滤条件
         this.props.clearRowFilter()
 
     }

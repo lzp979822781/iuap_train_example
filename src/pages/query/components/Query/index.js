@@ -14,6 +14,8 @@ import Header from 'components/Header';
 import PopDialog from 'components/Pop';
 // 导入搜索区组件
 import SearchArea from '../SearchArea';
+//引用公共组件中的button
+import Button from 'components/Button';
 
 // 封装的工具类
 import {deepClone, getSortMap} from "utils";
@@ -221,10 +223,17 @@ class Query extends Component {
         actions.query.loadList(queryParam);
     }
 
+    /**
+     * 导出excel
+     */
+    export = () => {
+        this.grid.exportExcel();
+    }
+
     render() {
         const _this = this;
         const {queryObj, showLoading, queryParam} = _this.props;
-        const {filterable, record} = _this.state;
+        const {filterable, record, tableHeight} = _this.state;
         const column = [
             {
                 title: "数据",
@@ -460,6 +469,12 @@ class Query extends Component {
                     clearRowFilter={this.clearRowFilter}
                     onCallback={this.resetTableHeight}
                 />
+                {/* 导出按钮 */}
+                <div className='table-header'>
+                    <Button iconType="uf-export" className="ml8" onClick={_this.export}>
+                        导出
+                    </Button>
+                </div>
                 {/* 表格区域 */}
                 <div className="gird-parent">
                     <Grid
@@ -476,7 +491,7 @@ class Query extends Component {
                         afterRowFilter={_this.afterRowFilter} //控制栏位的显示/隐藏
                         sort={sortObj} //排序属性设置
 
-                        // scroll={{y: 400}}
+                        scroll={{y: tableHeight}}
                         sheetHeader={{height: 30, ifshow: false}} //设置excel导出的表头的样式、支持height、ifshow
                     />
                 </div>

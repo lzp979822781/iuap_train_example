@@ -10,6 +10,8 @@ export default {
     // 设置当前 Model 所需的初始化 state
     initialState: {
         showLoading: false,
+        // 缓存行过滤条件
+        cacheFilter: [],
         queryParam: {
             pageParams: {
                 pageIndex: 0,
