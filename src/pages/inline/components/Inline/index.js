@@ -16,6 +16,9 @@ import { deepClone, getPageParam } from "utils";
 import Grid from 'components/Grid';
 //布局类组件
 import Header from 'components/Header';
+//项目级按钮
+import Button from 'components/Button';
+
 
 //组件样式引用
 import 'bee-complex-grid/build/Grid.css';
@@ -199,6 +202,58 @@ class Inline extends Component {
         return (
             <div className='inline'>
                 <Header title='单表行内编辑' />
+                <div className='table-header'>
+                    <Button
+                        iconType="uf-plus"
+                        className="ml8"
+                    >
+                        新增
+                        </Button>
+                    <Button
+                        iconType="uf-pencil"
+                        className="ml8"
+                    >
+                        修改
+                        </Button>
+                    <Button
+                        iconType="uf-del"
+                        className="ml8"
+                    >
+                        删除
+                          </Button>
+                    <Button
+                        iconType="uf-table"
+                        className="ml8"
+                    >
+                        下载模板
+                     </Button>
+                    <Button
+                        iconType="uf-import"
+                        className="ml8"
+                    >
+                        导入
+                    </Button>
+                    <Button
+                        iconType="uf-export"
+                        className="ml8"
+                    >
+                        导出
+                     </Button>
+                    <Button
+                        iconType="uf-save"
+                        className="ml8"
+                        onClick={this.onClickSave}
+                    >
+                        保存
+                    </Button>
+                    <Button
+                        iconType="uf-back"
+                        className="ml8"
+                    >
+                        取消
+                    </Button>
+
+                </div>
                 <div className='grid-parent'>
                     <Grid
                         ref={(el) => this.grid = el}//ref用于调用内部方法
