@@ -9,6 +9,7 @@ export default {
     name: "many",
     // 设置当前 Model 所需的初始化 state
     initialState: {
+        searchParam: {},
         passengerObj: {
             list: [],
             pageIndex: 1,
@@ -38,9 +39,12 @@ export default {
          */
         async loadList(param, getState) {
             try {
+                // 请求后台数据
                 const resPassenger = processData(await api.getList(param));  // 调用 getList 请求数据
+                // 拼接参数passengerObj
                 const {content = []} = resPassenger;
                 const passengerObj = structureObj(resPassenger, param);
+                // 更新参数
                 actions.many.updateState({passengerObj}); // 更新主表数据
             } catch (error) {
                 const { passengerObj} = getState().many;
@@ -50,7 +54,7 @@ export default {
                     }
                 );
             } finally {
-                // 默认选中第一条
+                // 默认选中第一条,不管请求成功或失败,取消进度条
                 actions.many.updateState({showLoading: false, passengerIndex: 0});
             }
         },
