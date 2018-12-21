@@ -37,8 +37,10 @@ class Inline extends Component {
      * @memberof Inline
      */
     componentDidMount() {
-        
+        //生命周期加载数据
+        actions.inline.loadList(this.props.queryParam);//初始化Grid数据
     }
+
 
     //定义Grid的Column
     column = [
@@ -149,8 +151,51 @@ class Inline extends Component {
         }
     ];
 
+    /**
+ * 跳转指定页码
+ *
+ * @param {*} pageIndex
+ */
+    freshData = (pageIndex) => {
+        this.onPageSelect(pageIndex, 0);
+    }
+
+    /**
+     * 分页  跳转指定页数和设置一页数据条数
+     *
+     * @param {*} index
+     * @param {*} value
+     */
+    onDataNumSelect = (index, value) => {
+        this.onPageSelect(value, 1);
+    }
+
+    /**
+     * type为0标识为pageIndex,为1标识pageSize
+     *
+     * @param {*} value
+     * @param {*} type
+     */
+    onPageSelect = (value, type) => {
+        let queryParam = deepClone(this.props.queryParam); // 深拷贝查询条件从action里
+        const { pageIndex, pageSize } = getPageParam(value, type, queryParam.pageParams);
+        queryParam['pageParams'] = { pageIndex, pageSize };
+        actions.inline.updateState(queryParam); // 更新action queryParam
+        actions.inline.loadList(queryParam);
+    }
 
     render() {
+        const _this = this;
+        let { list, showLoading, pageIndex, totalPages, total } = _this.props;
+        //分页条数据
+        const paginationObj = {
+            activePage: pageIndex,//当前页
+            total: total,//总条数
+            items: totalPages,
+            freshData: _this.freshData,//刷新数据
+            onDataNumSelect: _this.onDataNumSelect,//选择记录行
+        }
+
         return (
             <div className='inline'>
                 <Header title='单表行内编辑' />
@@ -159,8 +204,11 @@ class Inline extends Component {
                         ref={(el) => this.grid = el}//ref用于调用内部方法
                         rowKey={r => r.id ? r.id : r.key}//表格内使用的唯一key用于性能优化
                         columns={this.column}//定义列数据
+                        paginationObj={paginationObj}//分页数据
+                        data={list}//数据
                     />
                 </div>
+                <Loading fullScreen={true} show={showLoading} loadingType="line" />
             </div>
         )
     }
