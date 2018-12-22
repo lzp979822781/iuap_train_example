@@ -9,7 +9,7 @@ import moment from 'moment';
 import ButtonRoleGroup from 'components/ButtonRoleGroup';
 import AcAttachment from 'ac-attachment';
 
-// import SearchArea from '../SearchArea/index';
+import SearchArea from '../SearchArea/index';
 // import Passenger from '../PassengerModal/index';
 // import Emergency from '../EmergencyModal/index';
 // import Traveling from '../BookModal/index';
@@ -166,6 +166,7 @@ class Many extends Component {
         return (
             <div className='master-detail-many' >
                <Header title='B3 一主多子示例'/>
+               <SearchArea passengerObj={passengerObj} />
                <Grid
                     ref="passenger"
                     data={passengerObj.list}
