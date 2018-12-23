@@ -21,6 +21,7 @@ class SearchArea extends Component {
     }
 
     componentDidMount(){
+        this.props.onRef(this);
     }
 
     /** 查询数据

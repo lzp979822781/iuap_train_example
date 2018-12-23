@@ -9,6 +9,7 @@ export default {
     name: "many",
     // 设置当前 Model 所需的初始化 state
     initialState: {
+        passengerIndex: 0, // 默认选中第一行
         searchParam: {},
         passengerObj: {
             list: [],
@@ -58,5 +59,38 @@ export default {
                 actions.many.updateState({showLoading: false, passengerIndex: 0});
             }
         },
+
+        /**
+         * getSelect：保存主表数据
+         * @param {*} param
+         * @param {*} getState
+         */
+
+        async savePassenger(param, getState) {
+            try {
+                const {btnFlag}=param;
+                let res=null;
+                delete param.btnFlag; //删除标识字段
+                if(btnFlag===0){ // 添加数据
+                    res = processData(await api.savePassenger(param), '添加成功');
+                }
+                if(btnFlag===1){ // 修改数据
+                    res = processData(await api.updatePassenger(param), '修改成功');
+                }
+
+                if (res) { // 如果不判断是会报错，param参数有错
+                    const {pageSize} = getState().many.passengerObj;
+                    // 带上子表信息
+                    const {search_contactName} = getState().many.searchParam;
+                    const param = {pageIndex: 0, pageSize,search_contactName}; // 获取主表信息
+                    actions.many.loadList(param);
+                }
+            } catch (error) {
+                console.log(error);
+            } finally {
+                actions.many.updateState({showLoading: false});
+            }
+        },
+
     }
 };

@@ -10,7 +10,7 @@ import ButtonRoleGroup from 'components/ButtonRoleGroup';
 import AcAttachment from 'ac-attachment';
 
 import SearchArea from '../SearchArea/index';
-// import Passenger from '../PassengerModal/index';
+import Passenger from '../PassengerModal/index';
 // import Emergency from '../EmergencyModal/index';
 // import Traveling from '../BookModal/index';
 
@@ -29,7 +29,8 @@ class Many extends Component {
     constructor(props) {
         super(props);
         this.state = {
-
+            modalVisible: false, // 添加、编辑、详情 弹框
+            flag: -1, //按钮状态
         }
     }
 
@@ -157,16 +158,76 @@ class Many extends Component {
         actions.many.updateState({searchParam});
     }
 
+    /**
+     * @description 打开模态框
+     * @param {string} type 当前选中的table选项值为主表或子表
+     * @param {number} status 状态 0 添加，1 编辑 2. 详情
+     */
+    onShowModal = (type, status) => {
+        this.setState({
+            modalVisible: true,
+            flag: status,
+            checkTable: type,
+        });
+
+    }
+
+    /**
+     *
+     * 关闭弹框 view update modal
+     * @param {Boolean} isSave 判断是否添加或者更新
+     * */
+    onCloseModal = (isSave = false) => {
+        this.setState({modalVisible: false, flag: -1});
+        if ((typeof isSave) === 'boolean') {
+            this.child.reset();
+        }
+
+    }
+
+    // 为自组件定义ref属性,供父组件调用子组件方法
+    onRef = (ref) => {
+        this.child = ref;
+    }
+
+
     render() {
 
         const _this = this;
         // 从model.js中传入的属性passengerObj获取数据
-        const { passengerObj } = this.props;
-        
+        const { passengerObj, passengerIndex } = this.props;
+        const {
+            modalVisible, flag, checkTable,
+        } = this.state;
         return (
             <div className='master-detail-many' >
                <Header title='B3 一主多子示例'/>
-               <SearchArea passengerObj={passengerObj} />
+               <SearchArea passengerObj={passengerObj} onRef = {_this.onRef}/>
+               <div className='table-header'>
+                    <Button iconType="uf-plus" className="ml8"
+                        role="add"
+                        onClick={() => this.onShowModal('passenger', 0)}
+                    >新增</Button>
+                    <Button iconType="uf-pencil" className="ml8"
+                        role="update"
+                        onClick={() => _this.onShowModal("passenger", 1)}
+                    >修改</Button>
+                    {/* <Button iconType="uf-list-s-o" className="ml8"
+                        onClick={() => _this.onShowModal("passenger", 2)}
+                    >详情</Button>
+                    <Button iconType="uf-del" className="ml8"
+                        role="delete"
+                        onClick={() => _this.onClickDel("passenger")}
+                    >删除</Button>
+                    <Button iconType="uf-export" className="ml8"
+                            onClick={() => _this.export("passenger")}
+                    >导出</Button>
+                    <Button iconType="uf-print" className="ml8"
+                        onClick={_this.onPrint}
+                    >
+                        打印
+                    </Button> */}
+                </div>
                <Grid
                     ref="passenger"
                     data={passengerObj.list}
@@ -175,7 +236,7 @@ class Many extends Component {
                     showHeaderMenu={true}
                     draggable={true}
                     multiSelect={false}
-                    /* onRowClick={(record, index) => {
+                    onRowClick={(record, index) => {
                         actions.many.updateState({passengerIndex: index});
                         // 根据tab 页来获取子表数据
                         const {passengerObj, travelingObj, emergencyObj, tabKey, searchParam} = this.props;
@@ -183,18 +244,18 @@ class Many extends Component {
                         const {list} = passengerObj;
                         const {id: search_passengerId} = list[index];
                         let param = {pageIndex: 0, search_passengerId, search_contactName};
-                        if (tabKey === "emergency") { // tab为emergency 获取emergency子表数据
+                        /* if (tabKey === "emergency") { // tab为emergency 获取emergency子表数据
                             param.pageSize = emergencyObj.pageSize;
                             actions.many.loadEmergencyList(param)
                         }
                         if (tabKey === "traveling") { // tab为travling 获取travling子表数据
                             param.pageSize = travelingObj.pageSize;
                             actions.many.loadTravelingList(param)
-                        }
-                    }} */
-                    /* rowClassName={(record, index, indent) => { //判断是否选中当前行
+                        } */
+                    }}
+                    rowClassName={(record, index, indent) => { //判断是否选中当前行
                         return passengerIndex === index ? "selected" : "";
-                    }} */
+                    }}
                     paginationObj={{
                         ...this.getBasicPage(passengerObj),
                         freshData: (pageSize) => {
@@ -205,6 +266,20 @@ class Many extends Component {
                         },
                         dataNum: 0,
                     }}
+                />
+
+                {/*添加乘客乘客信息modal*/}
+                <Passenger
+                    passengerObj={passengerObj}
+                    // 1.少写变量modalVisible， 2.减少bug 永远只有一个弹框
+                    modalVisible={modalVisible && checkTable === "passenger" && flag !== -1}
+                    // flag表明打开的页面是新增还是修改页面
+                    btnFlag={flag}
+                    // 关闭模态框事件
+                    onCloseModal={this.onCloseModal}
+                    // 当前表格选中行的索引，弹出修改模态框时使用
+                    currentIndex={passengerIndex}
+                    checkTable={checkTable}
                 />
             </div>
         )
