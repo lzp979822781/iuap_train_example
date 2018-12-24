@@ -36,7 +36,8 @@ class Inline extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            showPop: false
+            showPop: false,
+            showPopCancel: false
         }
     }
 
@@ -682,11 +683,64 @@ class Inline extends Component {
                 break;
         }
     }
+    /**
+     * 检查是否可选状态
+     *
+     */
+    hasCheck = () => {
+        let { selectData, list } = this.props;
+        let flag = false;
+        selectData.map(item => {
+            if (item._checked == true) {
+                flag = true;
+            }
+        });
+        list.map(item => {
+            if (item._checked == true) {
+                flag = true;
+            }
+        });
+        return flag
+    }
+    /**
+     *  新增或修改给出的确定
+     *
+     */
+    onClickPopUnSaveOK = () => {
+        //重置store内的数据
+        actions.inline.resetData(true);
+        //清空选中的数据
+        actions.inline.updateState({ selectData: [], rowEditStatus: true });
+        this.setState({ showPopCancel: false });
+        this.oldData = [];
+    }
+    /**
+     *  新增或修改给出的取消
+     *
+     */
+    onClickPopUnSaveCancel = () => {
+        this.setState({ showPopCancel: false });
+    }
+    /**
+     * 表格内的取消
+     */
+    onClickCancel = () => {
+        //检查是否有修改过的选中
+        if (this.hasCheck()) {
+            this.setState({ showPopCancel: true });
+        } else {
+            this.oldData = [];//清空上一次结果
+            //重置store内的数据
+            actions.inline.resetData(true);
+            //清空选中的数据
+            actions.inline.updateState({ selectData: [], rowEditStatus: true });
+        }
+    }
 
 
     render() {
         const _this = this;
-        let { showPop } = _this.state;
+        let { showPop, showPopCancel } = _this.state;
         let { list, showLoading, pageIndex, totalPages, total, rowEditStatus, status } = _this.props;
         //分页条数据
         const paginationObj = {
@@ -757,9 +811,16 @@ class Inline extends Component {
                     <Button
                         iconType="uf-back"
                         className="ml8"
+                        onClick={this.onClickCancel}
                     >
                         取消
                     </Button>
+                    <Alert
+                        show={showPopCancel}
+                        context="数据未保存，确定离开 ?"
+                        confirmFn={this.onClickPopUnSaveOK}
+                        cancelFn={this.onClickPopUnSaveCancel}
+                    />
 
                 </div>
                 <div className='grid-parent'>

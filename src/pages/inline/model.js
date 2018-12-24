@@ -61,7 +61,8 @@ export default {
                     pageIndex,
                     totalPages,
                     total,
-                    queryParam: param
+                    queryParam: param,
+                    cacheData: list//缓存数据
                 });
             }
         },
@@ -116,6 +117,22 @@ export default {
                 return false;
             }
         },
+        /**
+         * 重置数据
+         *
+         * @param {*} status
+         * @param {*} getState
+         */
+        resetData(status, getState) {
+            let cacheData = getState().inline.cacheData.slice();
+            cacheData.map(item => delete item.edit);
+            cacheData.map(item => delete item._edit);
+            if (status) {
+                actions.inline.updateState({ list: cacheData, status: "view" });
+            } else {
+                actions.inline.updateState({ list: cacheData });
+            }
+        }
 
     }
 };
