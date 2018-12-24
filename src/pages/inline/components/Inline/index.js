@@ -456,6 +456,26 @@ class Inline extends Component {
         actions.inline.updateState({ list: this.oldData.concat(newData), status: "new", rowEditStatus: false, selectData: [] });
     }
 
+    /**
+     * 修改
+     */
+    onClickUpdate = () => {
+        let editData = [...this.props.list];
+        //当前行数据设置编辑态
+        for (let i = 0; i < editData.length; i++) {
+            editData[i]['_edit'] = true;
+            editData[i]['_checked'] = false;
+            editData[i]['_status'] = 'edit';
+        }
+        //重置操作栏位
+        this.grid.resetColumns(this.column);
+        //同步操作数据
+        this.oldData = deepClone(editData);
+        //保存处理后的数据，并且切换操作态'编辑'
+        actions.inline.updateState({ list: editData, status: "edit", rowEditStatus: false });
+    }
+
+
     render() {
         const _this = this;
         let { list, showLoading, pageIndex, totalPages, total, rowEditStatus, status } = _this.props;
@@ -483,6 +503,7 @@ class Inline extends Component {
                     <Button
                         iconType="uf-pencil"
                         className="ml8"
+                        onClick={this.onClickUpdate}
                     >
                         修改
                     </Button>
