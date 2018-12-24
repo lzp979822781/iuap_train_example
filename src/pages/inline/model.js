@@ -99,7 +99,23 @@ export default {
             } else {
                 return false;
             }
-        }
+        },
+        /**
+         * 批量删除数据
+         *
+         * @param {Array} [param=[]]
+         */
+        async removes(param, getState) {
+            actions.inline.updateState({ showLoading: true });
+            let { data } = await api.removes(param);
+            actions.inline.updateState({ showLoading: false, selectData: [] });
+            if (data.success == 'success') {
+                actions.inline.loadList(getState().inline.queryParam);
+                return true;
+            } else {
+                return false;
+            }
+        },
 
     }
 };

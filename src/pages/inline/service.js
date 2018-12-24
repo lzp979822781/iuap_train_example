@@ -13,6 +13,7 @@ const URL = {
     "GET_LIST": `${GROBAL_HTTP_CTX}/allowances/list`,
     "GET_ADD": `${GROBAL_HTTP_CTX}/allowances/saveMultiple`,
     "GET_UPDATE": `${GROBAL_HTTP_CTX}/allowances/updateMultiple`,
+    "GET_DELETE": `${GROBAL_HTTP_CTX}/allowances/deleteBatch`,
 }
 
 /**
@@ -51,6 +52,18 @@ export const adds = (data) => {
  */
 export const updates = (data) => {
     return request(URL.GET_UPDATE, {
+        method: "post",
+        data
+    });
+}
+
+/**
+ * 删除数据
+ * @param {Array} data 数组对象批量删除ids
+ * @returns {Promise}
+ */
+export const removes = (data) => {
+    return request(URL.GET_DELETE, {
         method: "post",
         data
     });
