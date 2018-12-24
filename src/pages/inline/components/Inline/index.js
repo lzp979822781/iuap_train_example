@@ -404,10 +404,61 @@ class Inline extends Component {
         actions.inline.updateState(queryParam); // 更新action queryParam
         actions.inline.loadList(queryParam);
     }
+    /**
+     * 新增行数据
+     */
+    handlerNew = () => {
+        let newData = deepClone(this.props.list);//克隆原始数据
+        newData = newData.filter(item => !item._isNew);//去除新增字段
+        //这里是新增后的新数据模板，用于默认值
+        let tmp = {
+            key: uuid(),
+            _edit: true,
+            _isNew: true,
+            _checked: false,
+            _disabled: false,
+            _flag: false,
+            code: '',
+            name: '',
+            sex: '',
+            sexEnumValue: '',
+            deptName: '',
+            levelName: '',
+            serviceYears: 0,
+            serviceYearsCompany: 0,
+            year: moment().format('YYYY'),
+            month: '',
+            monthEnumValue: '',
+            allowanceType: '',
+            allowanceTypeEnumValue: '',
+            allowanceStandard: 0,
+            allowanceActual: 0,
+            exdeeds: '',
+            exdeedsEnumValue: '',
+            // applyTime: moment(),
+            pickType: '',
+            pickTypeEnumValue: '',
+            // pickTime: moment(),
+            remark: ''
+        }
+        this.oldData.unshift(tmp);//插入到最前
+        //禁用其他checked
+        for (let i = 0; i < newData.length; i++) {
+            newData[i]['_disabled'] = true;
+            newData[i]['_checked'] = false;
+            newData[i]['_status'] = 'new';
+        }
+
+        //重置操作栏位
+        this.grid.resetColumns(this.column);
+        //同步状态数据
+        //保存处理后的数据，并且切换操作态'新增'
+        actions.inline.updateState({ list: this.oldData.concat(newData), status: "new", rowEditStatus: false, selectData: [] });
+    }
 
     render() {
         const _this = this;
-        let { list, showLoading, pageIndex, totalPages, total } = _this.props;
+        let { list, showLoading, pageIndex, totalPages, total, rowEditStatus, status } = _this.props;
         //分页条数据
         const paginationObj = {
             activePage: pageIndex,//当前页
@@ -415,6 +466,7 @@ class Inline extends Component {
             items: totalPages,
             freshData: _this.freshData,//刷新数据
             onDataNumSelect: _this.onDataNumSelect,//选择记录行
+            disabled: status !== "view"//分页条禁用状态
         }
 
         return (
@@ -424,21 +476,22 @@ class Inline extends Component {
                     <Button
                         iconType="uf-plus"
                         className="ml8"
+                        onClick={this.handlerNew}
                     >
                         新增
-                        </Button>
+                    </Button>
                     <Button
                         iconType="uf-pencil"
                         className="ml8"
                     >
                         修改
-                        </Button>
+                    </Button>
                     <Button
                         iconType="uf-del"
                         className="ml8"
                     >
                         删除
-                          </Button>
+                    </Button>
                     <Button
                         iconType="uf-table"
                         className="ml8"
@@ -479,6 +532,11 @@ class Inline extends Component {
                         columns={this.column}//定义列数据
                         paginationObj={paginationObj}//分页数据
                         data={list}//数据
+                        columnFilterAble={rowEditStatus}//是否显示右侧隐藏行
+                        showHeaderMenu={rowEditStatus}//是否显示菜单
+                        dragborder={rowEditStatus}//是否调整列宽
+                        draggable={rowEditStatus}//是否拖拽
+                        syncHover={rowEditStatus}//是否同步状态
                     />
                 </div>
                 <Loading fullScreen={true} show={showLoading} loadingType="line" />
