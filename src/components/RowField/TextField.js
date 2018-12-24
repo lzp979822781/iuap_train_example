@@ -11,7 +11,7 @@ import schema from 'async-validator';
 //Tinper-bee
 import { FormControl, Icon } from 'tinper-bee';
 //提示类组件
-import Tooltip from 'rc-tooltip';
+import Tooltip from 'bee-tooltip';
 
 //自定义样式
 import './style.less';
@@ -123,7 +123,7 @@ class TextField extends Component {
             />
             {error && <div className="triangle-icon">
                 <Tooltip
-                    overlayClassName="inline-edit-tooltip"
+                    className="inline-edit-tooltip"
                     placement="bottom"
                     overlay={<div><Icon type="uf-exc-t-o" />{message}</div>}
                 >

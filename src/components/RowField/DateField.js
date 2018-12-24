@@ -13,7 +13,7 @@ import schema from 'async-validator';
 //Tinper-bee
 import { Icon } from 'tinper-bee';
 //提示类组件
-import Tooltip from 'rc-tooltip';
+import Tooltip from 'bee-tooltip';
 //日期组件
 import DatePicker from 'bee-datepicker';
 //本地化日期
@@ -91,7 +91,7 @@ class DateField extends Component {
             this.validate();
         });
         //回调外部函数
-        onChange && onChange(field, moment(value).format('YYYY'), index);
+        onChange && onChange(field, value, index);
     }
     /**
      * 校验
@@ -135,7 +135,7 @@ class DateField extends Component {
             />
             {error && <div className="triangle-icon">
                 <Tooltip
-                    overlayClassName="inline-edit-tooltip"
+                    className="inline-edit-tooltip"
                     placement="bottom"
                     overlay={<div><Icon type="uf-exc-t-o" />{message}</div>}
                 >

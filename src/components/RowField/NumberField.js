@@ -11,7 +11,7 @@ import schema from 'async-validator';
 //Tinper-bee
 import { Icon } from 'tinper-bee';
 //提示类组件
-import Tooltip from 'rc-tooltip';
+import Tooltip from 'bee-tooltip';
 //数值组件
 import InputNumber from 'bee-input-number';
 
@@ -137,7 +137,7 @@ class NumberField extends Component {
             />
             {error && <div className="triangle-icon">
                 <Tooltip
-                    overlayClassName="inline-edit-tooltip"
+                    className="inline-edit-tooltip"
                     placement="bottom"
                     overlay={<div><Icon type="uf-exc-t-o" />{message}</div>}
                 >

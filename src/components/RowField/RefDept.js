@@ -11,7 +11,7 @@ import schema from 'async-validator';
 //Tinper-bee
 import { Icon } from 'tinper-bee';
 //提示类组件
-import Tooltip from 'rc-tooltip';
+import Tooltip from 'bee-tooltip';
 //部门参照组件
 import { RefIuapDept } from 'components/RefViews';
 
@@ -132,7 +132,7 @@ class RefDept extends Component {
             />
             {error && <div className="triangle-icon">
                 <Tooltip
-                    overlayClassName="inline-edit-tooltip"
+                    className="inline-edit-tooltip"
                     placement="bottom"
                     overlay={<div><Icon type="uf-exc-t-o" />{message}</div>}
                 >

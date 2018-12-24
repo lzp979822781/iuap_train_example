@@ -13,7 +13,7 @@ import schema from 'async-validator';
 //Tinper-bee
 import { Icon } from 'tinper-bee';
 //提示类组件
-import Tooltip from 'rc-tooltip';
+import Tooltip from 'bee-tooltip';
 //日期组件
 import DatePicker from 'bee-datepicker';
 //本地化日期
@@ -137,7 +137,7 @@ class YearField extends Component {
             />
             {error && <div className="triangle-icon">
                 <Tooltip
-                    overlayClassName="inline-edit-tooltip"
+                    className="inline-edit-tooltip"
                     placement="bottom"
                     overlay={<div><Icon type="uf-exc-t-o" />{message}</div>}
                 >
