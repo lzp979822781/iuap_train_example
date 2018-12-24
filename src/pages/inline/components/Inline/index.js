@@ -548,6 +548,142 @@ class Inline extends Component {
         });
     }
 
+    /**
+     * 处理只是新数据
+     *
+     * @param {array} oldData
+     * @returns {array}
+     */
+    filterIsNew = (oldData) => {
+        let data = deepClone(oldData);
+        return data.filter(item => (item['_isNew'] && item['_checked']));
+    }
+    /**
+     * 根据key关联对应数据后校验
+     *
+     * @param {array} data 要关联数据
+     * @param {array} list 被关联数据
+     * @returns
+     */
+    filterListKey = (data, list) => {
+        let _list = list.slice();
+        data.forEach((_data, _index) => {
+            _list.forEach((item, i) => {
+                if (_data['key'] == item['key']) {
+                    _list[i]['_validate'] = true;
+                }
+            });
+        });
+        return _list;
+    }
+    /**
+     * 验证数据否正确
+     *
+     * @param {array} data 欲验证的数据
+     * @returns {bool}
+     */
+    isVerifyData = (data) => {
+        let flag = true;
+        let pattern = /Validate\b/;//校验的正则结尾
+        data.forEach((item, index) => {
+            let keys = Object.keys(item);
+            //如果标准为false直接不参与计算说明已经出现了错误
+            if (flag) {
+                for (let i = 0; i < keys.length; i++) {
+                    if (pattern.test(keys[i])) {
+                        if (data[index][keys[i]]) {
+                            flag = true;
+                        } else {
+                            flag = false;
+                            break;
+                        }
+                    }
+                }
+            }
+        });
+        return flag
+    }
+    /**
+     * 根据id关联对应数据后校验
+     *
+     * @param {array} data 要关联数据
+     * @param {array} list 被关联数据
+     * @returns {array}
+     */
+    filterListId = (data, list) => {
+        let _list = list.slice();
+        data.forEach((_data, _index) => {
+            _list.forEach((item, i) => {
+                if (_data['id'] == item['id']) {
+                    _list[i]['_validate'] = true;
+                }
+            });
+        });
+        return _list;
+    }
+
+    /**
+     * 保存
+     */
+    onClickSave = async () => {
+        let data = deepClone(this.oldData);
+        let { status, list } = this.props;
+        let _list = list.slice();
+        switch (status) {
+            case 'new':
+                //筛选新增的值
+                //筛选打过对号的
+                data = this.filterIsNew(data);
+                //检查校验数据合法性
+                //查找对应的key关系来开启验证
+                _list = this.filterListKey(data, _list);
+                //开始校验actions
+                await actions.inline.updateState({ list: _list });
+                //检查是否验证通过
+                if (this.isVerifyData(this.filterIsNew(this.oldData))) {
+                    let vals = this.filterIsNew(this.oldData);
+                    if (vals.length == 0) {
+                        Info('请勾选数据后再保存');
+                    } else {
+                        let newResult = await actions.inline.adds(vals);
+                        if (newResult) {
+                            this.oldData = [];
+                            success('新增成功');
+                        } else {
+                            Error('新增失败');
+                        }
+                    }
+                }
+                break;
+            case 'edit':
+                //筛选新增的值
+                //筛选打过对号的
+                data = data.filter(item => (item['_checked']));
+                //检查校验数据合法性
+                //查找对应的key关系来开启验证
+                _list = this.filterListId(data, _list);
+                await actions.inline.updateState({ list: _list });
+                //检查是否验证通过
+                if (this.isVerifyData(data)) {
+                    if (data.length == 0) {
+                        Info('请勾选数据后再保存');
+                    } else {
+                        let editResult = await actions.inline.updates(data);
+                        if (editResult) {
+                            this.oldData = [];
+                            success('修改成功');
+                        } else {
+                            Error('修改失败');
+                        }
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+
     render() {
         const _this = this;
         let { showPop } = _this.state;
