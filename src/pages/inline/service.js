@@ -12,6 +12,7 @@ import { deepClone } from 'utils';
 const URL = {
     "GET_LIST": `${GROBAL_HTTP_CTX}/allowances/list`,
     "GET_ADD": `${GROBAL_HTTP_CTX}/allowances/saveMultiple`,
+    "GET_UPDATE": `${GROBAL_HTTP_CTX}/allowances/updateMultiple`,
 }
 
 /**
@@ -38,6 +39,18 @@ export const getList = (param) => {
 */
 export const adds = (data) => {
     return request(URL.GET_ADD, {
+        method: "post",
+        data
+    });
+}
+
+/**
+ * 修改数据
+ * @param {Array} data 数组对象批量修改id+ts
+ * @returns {Promise}
+ */
+export const updates = (data) => {
+    return request(URL.GET_UPDATE, {
         method: "post",
         data
     });

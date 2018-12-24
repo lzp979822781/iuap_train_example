@@ -12,7 +12,7 @@ import { Loading, Message } from 'tinper-bee';
 import moment from 'moment';
 
 //工具类
-import { uuid, deepClone, getPageParam } from "utils";
+import { uuid, deepClone, success, Error, Info, getPageParam } from "utils";
 
 //Grid组件
 import Grid from 'components/Grid';
@@ -20,6 +20,8 @@ import Grid from 'components/Grid';
 import Header from 'components/Header';
 //项目级按钮
 import Button from 'components/Button';
+//项目级提示框
+import Alert from 'components/Alert';
 
 //行编辑组件工厂
 import FactoryComp from './FactoryComp';
@@ -34,7 +36,7 @@ class Inline extends Component {
     constructor(props) {
         super(props);
         this.state = {
-
+            showPop: false
         }
     }
 
@@ -373,6 +375,38 @@ class Inline extends Component {
     }
 
     /**
+     * 点击多选框回调函数
+     *
+     * @param {object} selectData 选择的数据
+     * @param {object} record 当前行数据，空为点击全选
+     * @param {number} index 当前索引
+     */
+    getSelectedDataFunc = (selectData, record, index) => {
+        let { list } = this.props;
+        let _list = deepClone(list);
+        //当第一次没有同步数据
+        //同步list数据状态
+        if (index != undefined) {
+            _list[index]['_checked'] = !_list[index]['_checked'];
+        } else {//点击了全选
+            if (selectData.length > 0) {//全选
+                _list.map(item => {
+                    if (!item['_disabled']) {
+                        item['_checked'] = true
+                    }
+                });
+            } else {//反选
+                _list.map(item => {
+                    if (!item['_disabled']) {
+                        item['_checked'] = false
+                    }
+                });
+            }
+        }
+        actions.inline.updateState({ selectData, list: _list });
+    }
+
+    /**
      * 跳转指定页码
      *
      * @param {*} pageIndex
@@ -475,9 +509,48 @@ class Inline extends Component {
         actions.inline.updateState({ list: editData, status: "edit", rowEditStatus: false });
     }
 
+    /**
+     * 删除询问Pop
+     *
+     */
+    onClickDelConfirm = () => {
+        let { selectData } = this.props;
+        if (selectData.length > 0) {
+            this.setState({
+                showPop: true
+            });
+        } else {
+            Info('请勾选数据后再删除');
+        }
+    }
+    /**
+     * 取消
+     */
+    onClickPopCancel = () => {
+        this.setState({
+            showPop: false
+        });
+    }
+    /**
+     * 删除
+     */
+    onClickDel = async () => {
+        let { selectData } = this.props;
+        let delResult = await actions.inline.removes(selectData);
+        if (delResult) {
+            success('删除成功');
+            this.oldData = [];
+        } else {
+            Error('删除失败');
+        }
+        this.setState({
+            showPop: false
+        });
+    }
 
     render() {
         const _this = this;
+        let { showPop } = _this.state;
         let { list, showLoading, pageIndex, totalPages, total, rowEditStatus, status } = _this.props;
         //分页条数据
         const paginationObj = {
@@ -510,9 +583,16 @@ class Inline extends Component {
                     <Button
                         iconType="uf-del"
                         className="ml8"
+                        onClick={this.onClickDelConfirm}
                     >
                         删除
                     </Button>
+                    <Alert
+                        show={showPop}
+                        context="是否要删除 ?"
+                        confirmFn={this.onClickDel}
+                        cancelFn={this.onClickPopCancel}
+                    />
                     <Button
                         iconType="uf-table"
                         className="ml8"
@@ -558,6 +638,7 @@ class Inline extends Component {
                         dragborder={rowEditStatus}//是否调整列宽
                         draggable={rowEditStatus}//是否拖拽
                         syncHover={rowEditStatus}//是否同步状态
+                        getSelectedDataFunc={this.getSelectedDataFunc}//选择数据后的回调
                     />
                 </div>
                 <Loading fullScreen={true} show={showLoading} loadingType="line" />
