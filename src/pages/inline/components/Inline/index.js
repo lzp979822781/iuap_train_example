@@ -22,6 +22,8 @@ import Header from 'components/Header';
 import Button from 'components/Button';
 //项目级提示框
 import Alert from 'components/Alert';
+//按钮权限组件
+import ButtonRoleGroup from 'components/ButtonRoleGroup';
 
 //搜索区组件
 import SearchAreaForm from '../Search-area';
@@ -739,6 +741,14 @@ class Inline extends Component {
         }
     }
 
+    /**
+     * 下载模板
+     *
+     */
+    onClickDownloadTemplate = () => {
+        window.open(`${GROBAL_HTTP_CTX}/allowances/excelTemplateDownload`);
+    }
+
 
     render() {
         const _this = this;
@@ -764,80 +774,86 @@ class Inline extends Component {
                     searchOpen={true}//默认展开
                 />
                 <div className='table-header'>
-                    <Button
-                        iconType="uf-plus"
-                        className="ml8"
-                        disabled={getButtonStatus('add', status)}
-                        onClick={this.handlerNew}
+                    <ButtonRoleGroup
+                        funcCode="singletable-inlineEdit"
                     >
-                        新增
-                    </Button>
-                    <Button
-                        iconType="uf-pencil"
-                        className="ml8"
-                        disabled={getButtonStatus('edit', status)}
-                        onClick={this.onClickUpdate}
-                    >
-                        修改
-                    </Button>
-                    <Button
-                        iconType="uf-del"
-                        className="ml8"
-                        disabled={getButtonStatus('del', status)}
-                        onClick={this.onClickDelConfirm}
-                    >
-                        删除
-                    </Button>
-                    <Alert
-                        show={showPop}
-                        context="是否要删除 ?"
-                        confirmFn={this.onClickDel}
-                        cancelFn={this.onClickPopCancel}
-                    />
-                    <Button
-                        iconType="uf-table"
-                        className="ml8"
-                        disabled={getButtonStatus('down', status)}
-                    >
-                        下载模板
+                        <Button role="add"
+                            iconType="uf-plus"
+                            disabled={getButtonStatus('add', status)}
+                            className="ml8"
+                            onClick={this.handlerNew}
+                        >
+                            新增
+                        </Button>
+                        <Button
+                            role="update"
+                            iconType="uf-pencil"
+                            disabled={getButtonStatus('edit', status)}
+                            className="ml8" onClick={this.onClickUpdate}
+                        >
+                            修改
+                        </Button>
+                        <Button
+                            role="delete"
+                            iconType="uf-del"
+                            disabled={getButtonStatus('del', status)}
+                            className="ml8"
+                            onClick={this.onClickDelConfirm}
+                        >
+                            删除
+                          </Button>
+                        <Alert
+                            show={showPop}
+                            context="是否要删除 ?"
+                            confirmFn={this.onClickDel}
+                            cancelFn={this.onClickPopCancel}
+                        />
+                        <Button
+                            iconType="uf-table"
+                            disabled={getButtonStatus('down', status)}
+                            className="ml8"
+                            onClick={this.onClickDownloadTemplate}
+                        >
+                            下载模板
                      </Button>
-                    <Button
-                        iconType="uf-import"
-                        className="ml8"
-                        disabled={getButtonStatus('import', status)}
-                    >
-                        导入
+                        <Button
+                            iconType="uf-import"
+                            disabled={getButtonStatus('import', status)}
+                            className="ml8"
+                        >
+                            导入
                     </Button>
-                    <Button
-                        iconType="uf-export"
-                        className="ml8"
-                        disabled={getButtonStatus('export', status)}
-                    >
-                        导出
+                        <Button
+                            iconType="uf-export"
+                            disabled={getButtonStatus('export', status)}
+                            className="ml8"
+                            onClick={this.onClickExport}
+                        >
+                            导出
                      </Button>
-                    <Button
-                        iconType="uf-save"
-                        className="ml8"
-                        disabled={getButtonStatus('save', status)}
-                        onClick={this.onClickSave}
-                    >
-                        保存
+                        <Button
+                            iconType="uf-save"
+                            disabled={getButtonStatus('save', status)}
+                            className="ml8"
+                            onClick={this.onClickSave}
+                        >
+                            保存
                     </Button>
-                    <Button
-                        iconType="uf-back"
-                        className="ml8"
-                        disabled={getButtonStatus('cancel', status)}
-                        onClick={this.onClickCancel}
-                    >
-                        取消
+                        <Button
+                            iconType="uf-back"
+                            disabled={getButtonStatus('cancel', status)}
+                            className="ml8"
+                            onClick={this.onClickCancel}
+                        >
+                            取消
                     </Button>
-                    <Alert
-                        show={showPopCancel}
-                        context="数据未保存，确定离开 ?"
-                        confirmFn={this.onClickPopUnSaveOK}
-                        cancelFn={this.onClickPopUnSaveCancel}
-                    />
-
+                        <Alert
+                            show={showPopCancel}
+                            context="数据未保存，确定离开 ?"
+                            confirmFn={this.onClickPopUnSaveOK}
+                            cancelFn={this.onClickPopUnSaveCancel}
+                        />
+                    </ButtonRoleGroup>
                 </div>
                 <div className='grid-parent'>
                     <Grid
