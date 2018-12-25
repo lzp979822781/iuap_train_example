@@ -76,6 +76,7 @@
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "react-transition-group": "^2.5.2",
+    "ref-combobox": "0.0.1",
     "ref-multiple-table": "^0.1.14",
     "ref-tree": "^0.1.17",
     "tinper-bee": "1.6.5",
