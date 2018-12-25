@@ -4,15 +4,17 @@ import {Tabs, Loading} from 'tinper-bee';
 import Grid from 'components/Grid';
 import Header from 'components/Header';
 import Button from 'components/Button';
+// 删除模态框
 import Alert from 'components/Alert';
+
 import moment from 'moment';
 import ButtonRoleGroup from 'components/ButtonRoleGroup';
 import AcAttachment from 'ac-attachment';
 
 import SearchArea from '../SearchArea/index';
 import Passenger from '../PassengerModal/index';
-// import Emergency from '../EmergencyModal/index';
-// import Traveling from '../BookModal/index';
+import Emergency from '../EmergencyModal/index';
+import Traveling from '../BookModal/index';
 
 
 import {deepClone, Warning, getPageParam} from "utils";
@@ -29,8 +31,13 @@ class Many extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            delModalVisible: false,  //是否弹出删除模态框
+            checkTable: "passenger", //选中的表名 用于modal 弹框标记
+            delPicModalVisible: false, // 添加、编辑、详情 弹框
             modalVisible: false, // 添加、编辑、详情 弹框
             flag: -1, //按钮状态
+            emergencyIndex: 0,   //子表emergency的选中行索引
+            travelingIndex: 0,   //子表订单信息的选中行索引
         }
     }
 
@@ -154,7 +161,22 @@ class Many extends Component {
             searchParam.pageSize = pageSize;
             searchParam.pageIndex = pageIndex;
             actions.many.loadList(searchParam);
-        } 
+        } else {
+            //子表分页
+            const {passengerIndex, passengerObj} = this.props;
+            const {id: search_passengerId} = passengerObj.list[passengerIndex];
+
+            const {search_contactName} = searchParam;
+
+            if (tableName === "emergencyObj") { //emergency 表分页
+                const temp = {search_passengerId, pageSize, pageIndex, search_contactName};
+                actions.many.loadEmergencyList(temp);
+            }
+            if (tableName === "travelingObj") { //emergency 表分页
+                const temp = {search_passengerId, pageSize, pageIndex, search_contactName};
+                actions.many.loadTravelingList(temp);
+            }
+        }
         actions.many.updateState({searchParam});
     }
 
@@ -190,15 +212,213 @@ class Many extends Component {
         this.child = ref;
     }
 
+    /**
+     * 显示删除弹框,checkable设计的意义在于主子表功能共用删除方法
+     * 以这个字段进行区分是主表删除还是子表删除
+     */
+    onClickDel = (checkTable) => {
+        this.setState({delModalVisible: true, checkTable});
+    }
+
+    /**
+     *删除确定操作
+     * @param {number} type 1.删除 2.取消
+     */
+    async confirmGoBack(type) {
+        const {checkTable} = this.state; //获取删除的表名
+        const {list} = this.props[checkTable + "Obj"];
+        this.setState({delModalVisible: false});
+        if (type === 1 && list.length > 0) {
+            if (checkTable === "passenger") { // 主表
+                const {passengerIndex} = this.props;
+                const record = list[passengerIndex];
+                await actions.many.delPassenger(record);
+            }
+            if (checkTable === "emergency") { // 子表
+                const {emergencyIndex} = this.state;
+                const record = list[emergencyIndex];
+                this.setState({emergencyIndex: 0}); //默认选中第一条
+                await actions.many.delEmergency(record);
+            }
+            if (checkTable === "traveling") { // 子表
+                const {travelingIndex} = this.state;
+                const record = list[travelingIndex];
+                this.setState({travelingIndex: 0}); //默认选中第一条
+                await actions.many.delTraveling(record);
+            }
+        }
+    }
+
+    /**
+     *
+     *导出excel
+     * @param {string} type 导出某个表
+     */
+    export = (type) => {
+        this.refs[type].exportExcel();
+    }
+
+    /**
+     * @description 该方法为页面打印调用方法,打印功能需要先查询打印模板，再调打印接口
+     * @param {string} id 当前行数据id
+     */
+    onPrint = () => {
+        const {passengerIndex, passengerObj} = this.props;
+        const {list} = passengerObj;
+        if (list.length === 0) {
+            Warning('请选择需打印的数据');
+            return;
+        }
+        const {id} = list[passengerIndex];
+        // funccode、nodekey在应用平台配置
+        actions.many.printDocument({
+            queryParams: {
+                funccode: 'masterdetail-many',
+                nodekey: 'passenger'
+            },
+            printParams: {id: id}
+        });
+
+    }
+
+    // 子表column
+    emergencyColumn = [
+        {
+            title: "联系人姓名",
+            dataIndex: "contactName",
+            key: "contactName",
+            width: 180,
+        },
+        {
+            title: "联系人电话",
+            dataIndex: "contactPhone",
+            key: "contactPhone",
+            width: 180,
+        },
+        {
+            title: "与乘客关系",
+            dataIndex: "contactRelation",
+            key: "contactRelation",
+            width: 180,
+        },
+        {
+            title: "备注",
+            dataIndex: "remark",
+            key: "remark",
+            width: 120,
+        },
+    ];
+
+    travelingColumn = [
+        {
+            title: "乘车路线",
+            dataIndex: "line",
+            key: "line",
+            width: 120,
+        },
+        {
+            title: "上车站点",
+            dataIndex: "stationBegin",
+            key: "stationBegin",
+            width: 120,
+        },
+        {
+            title: "下车站点",
+            dataIndex: "stationEnd",
+            key: "stationEnd",
+            width: 120,
+        },
+        {
+            title: "费用",
+            dataIndex: "cost",
+            key: "cost",
+            width: 120,
+            className: 'column-number-right ', // 靠右对齐
+            render: (text, record, index) => {
+                return (<span>{(typeof text)==='number'? text.toFixed(2):""}</span>)
+            }
+        },
+        {
+            title: "支付状态",
+            dataIndex: "payStatusEnumValue",
+            key: "payStatusEnumValue",
+            width: 120,
+        }, {
+            title: "备注",
+            dataIndex: "remark",
+            key: "remark",
+            width: 120,
+        },
+
+    ];
+
+    /**
+     *
+     *tab 切换
+     * @param {string} tabKey uploadFill为文件上传，emergency子表，traveling子表
+     */
+    onChangeTab = (tabKey) => {
+        if (tabKey !== "uploadFill") { // 判断是否文件上传
+            const {passengerObj, passengerIndex, searchParam} = this.props;
+            const {pageSize} = this.props[tabKey + "Obj"];
+            const {id: search_passengerId} = passengerObj.list[passengerIndex] || {};
+            if (search_passengerId) { //如果主表有数据，子表在获取数据
+                const param = {search_passengerId, pageIndex: 0, pageSize};
+                if (tabKey === "emergency") {
+                    const {search_contactName} = searchParam;
+                    param.search_contactName = search_contactName; // 添加子表数据
+                    actions.many.loadEmergencyList(param); //获取emergency
+                }
+                if (tabKey === "traveling") {
+                    actions.many.loadTravelingList(param);  //获取traveling
+                }
+            }
+        }
+        actions.many.updateState({tabKey});
+    }
+
+    /**
+     *
+     *
+     * @param {string} resetObj 重置state，默认选中第一条
+     */
+    resetIndex = (resetObj) => {
+        this.setState({[resetObj]: 0})
+    }
+
+    /**
+     * 附件删除确定操作
+     * @param {number} type 1.删除 2.取消
+     */
+    async confirmDelPic(type) {
+        if (type === 1) {
+            // this.attch在附件的onDelete方法中赋值
+            this.attach.fDelete();
+        }
+        this.setState({delPicModalVisible: false});
+    }
 
     render() {
 
         const _this = this;
         // 从model.js中传入的属性passengerObj获取数据
-        const { passengerObj, passengerIndex } = this.props;
+        const { passengerObj, passengerIndex, showLoading,
+                tabKey,
+                emergencyObj, showEmergencyLoading,
+                travelingObj, showTravelingLoading} = this.props;
         const {
-            modalVisible, flag, checkTable,
+            delModalVisible, modalVisible, flag, 
+            checkTable,
+            emergencyIndex, travelingIndex,
+            delPicModalVisible 
         } = this.state;
+
+        let selectRow = passengerObj['list'][passengerIndex] || {};
+
+        const passengerForbid = passengerObj.list.length > 0 ? false : true;
+        const emergencyForbid = emergencyObj.list.length > 0 ? false : true;
+        const travelingForbid = travelingObj.list.length > 0 ? false : true;
+
         return (
             <div className='master-detail-many' >
                <Header title='B3 一主多子示例'/>
@@ -212,7 +432,7 @@ class Many extends Component {
                         role="update"
                         onClick={() => _this.onShowModal("passenger", 1)}
                     >修改</Button>
-                    {/* <Button iconType="uf-list-s-o" className="ml8"
+                    <Button iconType="uf-list-s-o" className="ml8"
                         onClick={() => _this.onShowModal("passenger", 2)}
                     >详情</Button>
                     <Button iconType="uf-del" className="ml8"
@@ -220,13 +440,13 @@ class Many extends Component {
                         onClick={() => _this.onClickDel("passenger")}
                     >删除</Button>
                     <Button iconType="uf-export" className="ml8"
-                            onClick={() => _this.export("passenger")}
+                            onClick={ () => _this.export("passenger")}
                     >导出</Button>
                     <Button iconType="uf-print" className="ml8"
                         onClick={_this.onPrint}
                     >
                         打印
-                    </Button> */}
+                    </Button>
                 </div>
                <Grid
                     ref="passenger"
@@ -244,14 +464,14 @@ class Many extends Component {
                         const {list} = passengerObj;
                         const {id: search_passengerId} = list[index];
                         let param = {pageIndex: 0, search_passengerId, search_contactName};
-                        /* if (tabKey === "emergency") { // tab为emergency 获取emergency子表数据
+                        if (tabKey === "emergency") { // tab为emergency 获取emergency子表数据
                             param.pageSize = emergencyObj.pageSize;
                             actions.many.loadEmergencyList(param)
                         }
                         if (tabKey === "traveling") { // tab为travling 获取travling子表数据
                             param.pageSize = travelingObj.pageSize;
                             actions.many.loadTravelingList(param)
-                        } */
+                        }
                     }}
                     rowClassName={(record, index, indent) => { //判断是否选中当前行
                         return passengerIndex === index ? "selected" : "";
@@ -268,6 +488,151 @@ class Many extends Component {
                     }}
                 />
 
+                <div className="tabel-header-wrap" >
+                    <Tabs
+                        defaultActiveKey={tabKey}
+                        onChange={this.onChangeTab}
+                    >
+                        <TabPane tab='紧急联系人' key="emergency">
+                            <div className='table-header-child'>
+                                {/* <ButtonRoleGroup funcCode="masterdetail-many"> */}
+                                    <Button iconType="uf-plus" className="ml8" role="add_em"
+                                            disabled={passengerForbid}
+                                            onClick={() => _this.onShowModal('emergency', 0)}
+                                    >新增</Button>
+                                    <Button iconType="uf-pencil" className="ml8" role="update_em"
+                                            disabled={emergencyForbid}
+                                            onClick={() => {
+                                                _this.onShowModal("emergency", 1);
+                                            }}
+                                    >修改</Button>
+                                    <Button iconType="uf-list-s-o" className="ml8"
+                                            disabled={emergencyForbid}
+                                            onClick={() => _this.onShowModal("emergency", 2)}
+                                    >详情</Button>
+                                    <Button iconType="uf-del" className="ml8" role="delete_em"
+                                            disabled={emergencyForbid}
+                                            onClick={() => _this.onClickDel("emergency")}
+                                    >删除</Button>
+                                    <Button iconType="uf-export" className="ml8"
+                                            onClick={() => _this.export("emergency")}
+                                    >导出</Button>
+                                {/* </ButtonRoleGroup> */}
+                            </div>
+                            <div style={{marginBottom: 24}}>
+                                <Grid
+                                    ref="emergency"
+                                    data={emergencyObj.list}
+                                    rowKey={(r, i) => i}
+                                    columns={_this.emergencyColumn}
+                                    showHeaderMenu={true}
+                                    draggable={true}
+                                    multiSelect={false}
+                                    // 分页
+                                    paginationObj={{
+                                        ...this.getBasicPage(emergencyObj),
+                                        freshData: (pageSize) => {
+                                            _this.freshData(pageSize, "emergencyObj");
+                                        },
+                                        onDataNumSelect: (index, value) => {
+                                            _this.onDataNumSelect(index, value, "emergencyObj");
+                                        },
+                                    }}
+
+                                    onRowClick={(record, index) => {
+                                        _this.setState({emergencyIndex: index});
+                                    }}
+                                    rowClassName={(record, index, indent) => {
+                                        if (_this.state.emergencyIndex === index) {
+                                            return 'selected';
+                                        } else {
+                                            return '';
+                                        }
+                                    }}
+                                    /* loading={{
+                                        show: (showEmergencyLoading && showLoading === false),
+                                        loadingType: "line"
+                                    }} */
+                                />
+                            </div>
+                        </TabPane>
+                        <TabPane tab='订票信息' key="traveling">
+                            <div className='table-header-child'>
+                                {/* <ButtonRoleGroup funcCode="masterdetail-many"> */}
+                                    <Button iconType="uf-plus" className="ml8" role="add_tr"
+                                            disabled={passengerForbid}
+                                            onClick={() => this.onShowModal('traveling', 0)}
+                                    >新增</Button>
+                                    <Button iconType="uf-pencil" className="ml8" role="update_tr"
+                                            disabled={travelingForbid}
+                                            onClick={() => _this.onShowModal("traveling", 1)}
+                                    >修改</Button>
+                                    <Button iconType="uf-list-s-o" className="ml8"
+                                            disabled={travelingForbid}
+                                            onClick={() => _this.onShowModal("traveling", 2)}
+                                    >详情</Button>
+                                    <Button iconType="uf-del" className="ml8" role="delete_tr"
+                                            disabled={travelingForbid}
+                                            onClick={() => _this.onClickDel("traveling")}
+                                    >删除</Button>
+                                    <Button iconType="uf-export" className="ml8"
+                                            onClick={() => _this.export("traveling")}
+                                    >导出</Button> 
+                                {/* </ButtonRoleGroup> */}
+                            </div>
+                            <div style={{marginBottom: 24}}>
+                                <Grid
+                                    ref="traveling"
+                                    data={travelingObj.list}
+                                    rowKey={(r, i) => i}
+                                    columns={_this.travelingColumn}
+                                    showHeaderMenu={true}
+                                    draggable={true}
+                                    multiSelect={false}
+                                    // 分页
+                                    paginationObj={{
+                                        ...this.getBasicPage(travelingObj),
+                                        freshData: (pageSize) => {
+                                            _this.freshData(pageSize, "travelingObj");
+                                        },
+                                        onDataNumSelect: (index, value) => {
+                                            _this.onDataNumSelect(index, value, "travelingObj");
+                                        },
+                                    }}
+                                    onRowClick={(record, index) => {
+                                        _this.setState({travelingIndex: index});
+                                    }}
+                                    rowClassName={(record, index, indent) => {
+                                        if (_this.state.travelingIndex === index) {
+                                            return 'selected';
+                                        } else {
+                                            return '';
+                                        }
+                                    }}
+                                    /* loading={{
+                                        show: (showTravelingLoading && showLoading === false),
+                                        loadingType: "line"
+                                    }} */
+
+                                />
+                            </div>
+                        </TabPane>
+                        <TabPane tab='附件管理' key="uploadFill">
+                            <div className='table-header-child'>
+                                <AcAttachment
+                                    disabled={passengerForbid}
+                                    recordId={selectRow['id']}
+                                    groupname='abc'
+                                    onDelete={(attach) => {
+                                        _this.setState({delPicModalVisible: true});
+                                        _this.attach = attach;
+                                    }}
+                                ></AcAttachment>
+                            </div>
+                        </TabPane>
+                    </Tabs>
+                </div>
+
                 {/*添加乘客乘客信息modal*/}
                 <Passenger
                     passengerObj={passengerObj}
@@ -281,6 +646,43 @@ class Many extends Component {
                     currentIndex={passengerIndex}
                     checkTable={checkTable}
                 />
+
+                {/*添加紧急联系人信息modal*/}
+                <Emergency
+                    emergencyObj={emergencyObj}
+                    passengerIndex={passengerIndex}
+                    passengerObj={passengerObj}
+                    modalVisible={modalVisible && checkTable === "emergency" && flag !== -1}
+                    btnFlag={flag}
+                    onCloseModal={this.onCloseModal}
+                    currentIndex={emergencyIndex}
+                    checkTable={checkTable}
+                    resetIndex={this.resetIndex}
+                />
+                {/*添加紧急联系人信息modal*/}
+                <Traveling
+                    travelingObj={travelingObj}
+                    passengerIndex={passengerIndex}
+                    passengerObj={passengerObj}
+                    modalVisible={modalVisible && checkTable === "traveling" && flag !== -1}
+                    btnFlag={flag}
+                    onCloseModal={this.onCloseModal}
+                    currentIndex={travelingIndex}
+                    checkTable={checkTable}
+                    resetIndex={this.resetIndex}
+
+                />
+
+                <Alert
+                    show={delModalVisible}
+                    context="确定删除这条记录吗 ?"
+                    confirmFn={() => _this.confirmGoBack(1)}
+                    cancelFn={() => _this.confirmGoBack(2)}/>
+                <Alert
+                    show={delPicModalVisible}
+                    context="确定删除文件吗 ?"
+                    confirmFn={() => _this.confirmDelPic(1)}
+                    cancelFn={() => _this.confirmDelPic(2)}/>
             </div>
         )
     }
