@@ -11,7 +11,7 @@ import schema from 'async-validator';
 //Tinper-bee
 import { Icon } from 'tinper-bee';
 //提示类组件
-import Tooltip from 'rc-tooltip';
+import Tooltip from 'bee-tooltip';
 //下拉组件
 import Select from 'bee-select';
 
@@ -127,7 +127,7 @@ class SelectField extends Component {
             </Select>
             {error && <div className="triangle-icon">
                 <Tooltip
-                    overlayClassName="inline-edit-tooltip"
+                    className="inline-edit-tooltip"
                     placement="bottom"
                     overlay={<div><Icon type="uf-exc-t-o" />{message}</div>}
                 >

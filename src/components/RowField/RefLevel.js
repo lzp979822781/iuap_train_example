@@ -11,7 +11,7 @@ import schema from 'async-validator';
 //Tinper-bee
 import { Icon } from 'tinper-bee';
 //提示类组件
-import Tooltip from 'rc-tooltip';
+import Tooltip from 'bee-tooltip';
 //参照组件职级
 import { RefWalsinLevel } from 'components/RefViews';
 
@@ -54,7 +54,7 @@ class RefLevel extends Component {
         super(props);
         this.state = {
             value: props.record.levelName ? JSON.stringify({
-                refpk: props.record.level,
+                refpk: props.record.postLevel,
                 refname: props.record.levelName
             }) : '',//处理兼容的参照数据
             flag: false,//是否编辑过
@@ -131,7 +131,7 @@ class RefLevel extends Component {
             />
             {error && <div className="triangle-icon">
                 <Tooltip
-                    overlayClassName="inline-edit-tooltip"
+                    className="inline-edit-tooltip"
                     placement="bottom"
                     overlay={<div><Icon type="uf-exc-t-o" />{message}</div>}
                 >

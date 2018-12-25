@@ -19,8 +19,13 @@ export default {
             },
             groupParams: [],
             whereParams: []
-        }
-
+        },
+        cacheData: [],//新增、修改缓存原始数据
+        tableData: [],//表格最终处理渲染的数据
+        selectData: [],//选中的状态数组
+        status: 'view',//表格状态：view=查看、edit=编辑、new=新增、del=删除
+        rowEditStatus: true,//操作拖拽列、宽开关
+        showLoading: false,//Loading
     },
     reducers: {
         /**
@@ -56,8 +61,76 @@ export default {
                     pageIndex,
                     totalPages,
                     total,
-                    queryParam: param
+                    queryParam: param,
+                    cacheData: list//缓存数据
                 });
+            }
+        },
+        /**
+         * 批量添加数据
+         *
+         * @param {Array} [param=[]] 数组对象的数据
+         * @returns {bool} 操作是否成功
+         */
+        async adds(param, getState) {
+            actions.inline.updateState({ showLoading: true });
+            let { data } = await api.adds(param);
+            actions.inline.updateState({ showLoading: false });
+            if (data.success == 'success') {
+                actions.inline.loadList(getState().inline.queryParam);
+                actions.inline.updateState({ status: "view", rowEditStatus: true, selectData: [] });
+                return true;
+            } else {
+                return false;
+            }
+        },
+        /**
+         * 批量修改数据
+         *
+         * @param {Array} [param=[]]
+         */
+        async updates(param, getState) {
+            actions.inline.updateState({ showLoading: true });
+            let { data } = await api.updates(param);
+            actions.inline.updateState({ showLoading: false, selectData: [] });
+            if (data.success == 'success') {
+                actions.inline.loadList(getState().inline.queryParam);
+                actions.inline.updateState({ status: "view", rowEditStatus: true, selectData: [] });
+                return true;
+            } else {
+                return false;
+            }
+        },
+        /**
+         * 批量删除数据
+         *
+         * @param {Array} [param=[]]
+         */
+        async removes(param, getState) {
+            actions.inline.updateState({ showLoading: true });
+            let { data } = await api.removes(param);
+            actions.inline.updateState({ showLoading: false, selectData: [] });
+            if (data.success == 'success') {
+                actions.inline.loadList(getState().inline.queryParam);
+                return true;
+            } else {
+                return false;
+            }
+        },
+        /**
+         * 重置数据
+         *
+         * @param {*} status
+         * @param {*} getState
+         */
+        resetData(status, getState) {
+            let cacheData = getState().inline.cacheData.slice();
+            cacheData.map(item => delete item.edit);
+            cacheData.map(item => delete item._edit);
+            if (status) {
+                actions.inline.updateState({ list: cacheData, status: "view" });
+            } else {
+                actions.inline.updateState({ list: cacheData });
             }
         }
 
