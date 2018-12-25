@@ -12,7 +12,7 @@ import { Loading, Message } from 'tinper-bee';
 import moment from 'moment';
 
 //工具类
-import { uuid, deepClone, success, Error, Info, getPageParam } from "utils";
+import { uuid, deepClone, success, Error, Info, getPageParam, getButtonStatus } from "utils";
 
 //Grid组件
 import Grid from 'components/Grid';
@@ -759,6 +759,7 @@ class Inline extends Component {
                     <Button
                         iconType="uf-plus"
                         className="ml8"
+                        disabled={getButtonStatus('add', status)}
                         onClick={this.handlerNew}
                     >
                         新增
@@ -766,6 +767,7 @@ class Inline extends Component {
                     <Button
                         iconType="uf-pencil"
                         className="ml8"
+                        disabled={getButtonStatus('edit', status)}
                         onClick={this.onClickUpdate}
                     >
                         修改
@@ -773,6 +775,7 @@ class Inline extends Component {
                     <Button
                         iconType="uf-del"
                         className="ml8"
+                        disabled={getButtonStatus('del', status)}
                         onClick={this.onClickDelConfirm}
                     >
                         删除
@@ -786,24 +789,28 @@ class Inline extends Component {
                     <Button
                         iconType="uf-table"
                         className="ml8"
+                        disabled={getButtonStatus('down', status)}
                     >
                         下载模板
                      </Button>
                     <Button
                         iconType="uf-import"
                         className="ml8"
+                        disabled={getButtonStatus('import', status)}
                     >
                         导入
                     </Button>
                     <Button
                         iconType="uf-export"
                         className="ml8"
+                        disabled={getButtonStatus('export', status)}
                     >
                         导出
                      </Button>
                     <Button
                         iconType="uf-save"
                         className="ml8"
+                        disabled={getButtonStatus('save', status)}
                         onClick={this.onClickSave}
                     >
                         保存
@@ -811,6 +818,7 @@ class Inline extends Component {
                     <Button
                         iconType="uf-back"
                         className="ml8"
+                        disabled={getButtonStatus('cancel', status)}
                         onClick={this.onClickCancel}
                     >
                         取消

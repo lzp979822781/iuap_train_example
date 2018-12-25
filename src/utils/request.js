@@ -1,9 +1,9 @@
 import axios from "axios";
 
 export default (url, options) => {
-    let params = Object.assign({}, options.param, {
+    let params = Object.assign({}, options.param, options.method.toLowerCase() == 'get' ? {
         r: Math.random()
-    });
+    } : {});
     return axios({
         method: options.method,
         url: url,
@@ -28,6 +28,10 @@ export default (url, options) => {
             }
 
         }
-        
+        // setTimeout(() => {
+        //     if (err.message == 'Network Error' || err.response == undefined) {
+        //         window.top.location.href = '/wbalone/pages/login/login.html';
+        //     }
+        // }, 3000);
     });
 }
