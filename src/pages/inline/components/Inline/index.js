@@ -12,7 +12,7 @@ import { Loading, Message } from 'tinper-bee';
 import moment from 'moment';
 
 //工具类
-import { uuid, deepClone, success, Error, Info, getPageParam, getButtonStatus } from "utils";
+import { uuid, deepClone, success, Error, Info, getPageParam, getButtonStatus, getHeight } from "utils";
 
 //Grid组件
 import Grid from 'components/Grid';
@@ -40,8 +40,9 @@ class Inline extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            tableHeight: 0,
             showPop: false,
-            showPopCancel: false
+            showPopCancel: false,
         }
     }
 
@@ -749,10 +750,35 @@ class Inline extends Component {
         window.open(`${GROBAL_HTTP_CTX}/allowances/excelTemplateDownload`);
     }
 
+    /**
+     * 导出数据
+     *
+     */
+    onClickExport = () => {
+        this.grid.exportExcel();
+    }
+
+    /**
+     * 重置表格高度计算回调
+     *
+     * @param {bool} isopen 是否展开
+     */
+    resetTableHeight = (isopen) => {
+        let tableHeight = 0;
+        if (isopen) {
+            //展开的时候并且适配对应页面数值px
+            tableHeight = getHeight() - 420
+        } else {
+            //收起的时候并且适配对应页面数值px
+            tableHeight = getHeight() - 270
+        }
+        this.setState({ tableHeight });
+    }
+
 
     render() {
         const _this = this;
-        let { showPop, showPopCancel } = _this.state;
+        let { showPop, showPopCancel, tableHeight } = _this.state;
         let { list, showLoading, pageIndex, totalPages, total, rowEditStatus, status, queryParam, pageSize } = _this.props;
         //分页条数据
         const paginationObj = {
@@ -772,6 +798,7 @@ class Inline extends Component {
                     status={status}//当前操作态
                     pageSize={pageSize}//总记录数
                     searchOpen={true}//默认展开
+                    onCallback={this.resetTableHeight}//折叠、展开后的回调
                 />
                 <div className='table-header'>
                     <ButtonRoleGroup
@@ -868,6 +895,7 @@ class Inline extends Component {
                         draggable={rowEditStatus}//是否拖拽
                         syncHover={rowEditStatus}//是否同步状态
                         getSelectedDataFunc={this.getSelectedDataFunc}//选择数据后的回调
+                        scroll={{ y: tableHeight }}//固定表头
                     />
                 </div>
                 <Loading fullScreen={true} show={showLoading} loadingType="line" />
