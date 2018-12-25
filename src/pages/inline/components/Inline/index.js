@@ -23,6 +23,8 @@ import Button from 'components/Button';
 //项目级提示框
 import Alert from 'components/Alert';
 
+//搜索区组件
+import SearchAreaForm from '../Search-area';
 //行编辑组件工厂
 import FactoryComp from './FactoryComp';
 
@@ -741,7 +743,7 @@ class Inline extends Component {
     render() {
         const _this = this;
         let { showPop, showPopCancel } = _this.state;
-        let { list, showLoading, pageIndex, totalPages, total, rowEditStatus, status } = _this.props;
+        let { list, showLoading, pageIndex, totalPages, total, rowEditStatus, status, queryParam, pageSize } = _this.props;
         //分页条数据
         const paginationObj = {
             activePage: pageIndex,//当前页
@@ -755,6 +757,12 @@ class Inline extends Component {
         return (
             <div className='inline'>
                 <Header title='单表行内编辑' />
+                <SearchAreaForm
+                    queryParam={queryParam}//搜索的查询参数
+                    status={status}//当前操作态
+                    pageSize={pageSize}//总记录数
+                    searchOpen={true}//默认展开
+                />
                 <div className='table-header'>
                     <Button
                         iconType="uf-plus"
