@@ -46,6 +46,11 @@ class Inline extends Component {
         }
     }
 
+    componentWillMount() {
+        //计算表格滚动条高度
+        this.resetTableHeight(true);
+    }
+
     /**
      * 渲染后执行的函数
      *
