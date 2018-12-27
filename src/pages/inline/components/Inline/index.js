@@ -12,7 +12,7 @@ import { Loading, Message } from 'tinper-bee';
 import moment from 'moment';
 
 //工具类
-import { uuid, deepClone, success, Error, Info, getPageParam, getButtonStatus } from "utils";
+import { uuid, deepClone, success, Error, Info, getPageParam, getButtonStatus, getHeight } from "utils";
 
 //Grid组件
 import Grid from 'components/Grid';
@@ -22,7 +22,11 @@ import Header from 'components/Header';
 import Button from 'components/Button';
 //项目级提示框
 import Alert from 'components/Alert';
+//按钮权限组件
+import ButtonRoleGroup from 'components/ButtonRoleGroup';
 
+//搜索区组件
+import SearchAreaForm from '../Search-area';
 //行编辑组件工厂
 import FactoryComp from './FactoryComp';
 
@@ -36,9 +40,15 @@ class Inline extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            tableHeight: 0,
             showPop: false,
-            showPopCancel: false
+            showPopCancel: false,
         }
+    }
+
+    componentWillMount() {
+        //计算表格滚动条高度
+        this.resetTableHeight(true);
     }
 
     /**
@@ -737,11 +747,44 @@ class Inline extends Component {
         }
     }
 
+    /**
+     * 下载模板
+     *
+     */
+    onClickDownloadTemplate = () => {
+        window.open(`${GROBAL_HTTP_CTX}/allowances/excelTemplateDownload`);
+    }
+
+    /**
+     * 导出数据
+     *
+     */
+    onClickExport = () => {
+        this.grid.exportExcel();
+    }
+
+    /**
+     * 重置表格高度计算回调
+     *
+     * @param {bool} isopen 是否展开
+     */
+    resetTableHeight = (isopen) => {
+        let tableHeight = 0;
+        if (isopen) {
+            //展开的时候并且适配对应页面数值px
+            tableHeight = getHeight() - 420
+        } else {
+            //收起的时候并且适配对应页面数值px
+            tableHeight = getHeight() - 270
+        }
+        this.setState({ tableHeight });
+    }
+
 
     render() {
         const _this = this;
-        let { showPop, showPopCancel } = _this.state;
-        let { list, showLoading, pageIndex, totalPages, total, rowEditStatus, status } = _this.props;
+        let { showPop, showPopCancel, tableHeight } = _this.state;
+        let { list, showLoading, pageIndex, totalPages, total, rowEditStatus, status, queryParam, pageSize } = _this.props;
         //分页条数据
         const paginationObj = {
             activePage: pageIndex,//当前页
@@ -755,81 +798,94 @@ class Inline extends Component {
         return (
             <div className='inline'>
                 <Header title='单表行内编辑' />
+                <SearchAreaForm
+                    queryParam={queryParam}//搜索的查询参数
+                    status={status}//当前操作态
+                    pageSize={pageSize}//总记录数
+                    searchOpen={true}//默认展开
+                    onCallback={this.resetTableHeight}//折叠、展开后的回调
+                />
                 <div className='table-header'>
-                    <Button
-                        iconType="uf-plus"
-                        className="ml8"
-                        disabled={getButtonStatus('add', status)}
-                        onClick={this.handlerNew}
+                    <ButtonRoleGroup
+                        funcCode="singletable-inlineEdit"
                     >
-                        新增
-                    </Button>
-                    <Button
-                        iconType="uf-pencil"
-                        className="ml8"
-                        disabled={getButtonStatus('edit', status)}
-                        onClick={this.onClickUpdate}
-                    >
-                        修改
-                    </Button>
-                    <Button
-                        iconType="uf-del"
-                        className="ml8"
-                        disabled={getButtonStatus('del', status)}
-                        onClick={this.onClickDelConfirm}
-                    >
-                        删除
-                    </Button>
-                    <Alert
-                        show={showPop}
-                        context="是否要删除 ?"
-                        confirmFn={this.onClickDel}
-                        cancelFn={this.onClickPopCancel}
-                    />
-                    <Button
-                        iconType="uf-table"
-                        className="ml8"
-                        disabled={getButtonStatus('down', status)}
-                    >
-                        下载模板
+                        <Button role="add"
+                            iconType="uf-plus"
+                            disabled={getButtonStatus('add', status)}
+                            className="ml8"
+                            onClick={this.handlerNew}
+                        >
+                            新增
+                        </Button>
+                        <Button
+                            role="update"
+                            iconType="uf-pencil"
+                            disabled={getButtonStatus('edit', status)}
+                            className="ml8" onClick={this.onClickUpdate}
+                        >
+                            修改
+                        </Button>
+                        <Button
+                            role="delete"
+                            iconType="uf-del"
+                            disabled={getButtonStatus('del', status)}
+                            className="ml8"
+                            onClick={this.onClickDelConfirm}
+                        >
+                            删除
+                          </Button>
+                        <Alert
+                            show={showPop}
+                            context="是否要删除 ?"
+                            confirmFn={this.onClickDel}
+                            cancelFn={this.onClickPopCancel}
+                        />
+                        <Button
+                            iconType="uf-table"
+                            disabled={getButtonStatus('down', status)}
+                            className="ml8"
+                            onClick={this.onClickDownloadTemplate}
+                        >
+                            下载模板
                      </Button>
-                    <Button
-                        iconType="uf-import"
-                        className="ml8"
-                        disabled={getButtonStatus('import', status)}
-                    >
-                        导入
+                        <Button
+                            iconType="uf-import"
+                            disabled={getButtonStatus('import', status)}
+                            className="ml8"
+                        >
+                            导入
                     </Button>
-                    <Button
-                        iconType="uf-export"
-                        className="ml8"
-                        disabled={getButtonStatus('export', status)}
-                    >
-                        导出
+                        <Button
+                            iconType="uf-export"
+                            disabled={getButtonStatus('export', status)}
+                            className="ml8"
+                            onClick={this.onClickExport}
+                        >
+                            导出
                      </Button>
-                    <Button
-                        iconType="uf-save"
-                        className="ml8"
-                        disabled={getButtonStatus('save', status)}
-                        onClick={this.onClickSave}
-                    >
-                        保存
+                        <Button
+                            iconType="uf-save"
+                            disabled={getButtonStatus('save', status)}
+                            className="ml8"
+                            onClick={this.onClickSave}
+                        >
+                            保存
                     </Button>
-                    <Button
-                        iconType="uf-back"
-                        className="ml8"
-                        disabled={getButtonStatus('cancel', status)}
-                        onClick={this.onClickCancel}
-                    >
-                        取消
+                        <Button
+                            iconType="uf-back"
+                            disabled={getButtonStatus('cancel', status)}
+                            className="ml8"
+                            onClick={this.onClickCancel}
+                        >
+                            取消
                     </Button>
-                    <Alert
-                        show={showPopCancel}
-                        context="数据未保存，确定离开 ?"
-                        confirmFn={this.onClickPopUnSaveOK}
-                        cancelFn={this.onClickPopUnSaveCancel}
-                    />
-
+                        <Alert
+                            show={showPopCancel}
+                            context="数据未保存，确定离开 ?"
+                            confirmFn={this.onClickPopUnSaveOK}
+                            cancelFn={this.onClickPopUnSaveCancel}
+                        />
+                    </ButtonRoleGroup>
                 </div>
                 <div className='grid-parent'>
                     <Grid
@@ -844,6 +900,7 @@ class Inline extends Component {
                         draggable={rowEditStatus}//是否拖拽
                         syncHover={rowEditStatus}//是否同步状态
                         getSelectedDataFunc={this.getSelectedDataFunc}//选择数据后的回调
+                        scroll={{ y: tableHeight }}//固定表头
                     />
                 </div>
                 <Loading fullScreen={true} show={showLoading} loadingType="line" />
