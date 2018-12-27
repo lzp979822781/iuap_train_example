@@ -1,5 +1,8 @@
 import axios from "axios";
 
+let x_xsrf_token = '',
+    random_num = Math.random();
+
 export default (url, options) => {
     let params = Object.assign({}, options.param, options.method.toLowerCase() == 'get' ? {
         r: Math.random()
@@ -8,9 +11,23 @@ export default (url, options) => {
         method: options.method,
         url: url,
         data: options.data,
-        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        headers: { 
+            'X-Requested-With': 'XMLHttpRequest',
+            'random-num' : random_num,
+            'x-xsrf-token' : x_xsrf_token
+        },
         params,
-        // timeout: 20000
+
+    }).then(function(res){
+        console.log('axios res', res);
+        let inner_x_xsrf_token = res.headers['x-xsrf-token'];//added by yany
+        if(inner_x_xsrf_token){
+            x_xsrf_token = inner_x_xsrf_token;
+        }
+
+        return new Promise((resolve, reject) => {
+            resolve(res);
+        })
     }).catch(function (err) {
         console.log(err);
         let res = err.response;
@@ -28,10 +45,6 @@ export default (url, options) => {
             }
 
         }
-        // setTimeout(() => {
-        //     if (err.message == 'Network Error' || err.response == undefined) {
-        //         window.top.location.href = '/wbalone/pages/login/login.html';
-        //     }
-        // }, 3000);
+
     });
 }
