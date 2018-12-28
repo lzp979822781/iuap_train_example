@@ -560,16 +560,6 @@ class Inline extends Component {
     }
 
     /**
-     * 处理只是新数据
-     *
-     * @param {array} oldData
-     * @returns {array}
-     */
-    filterIsNew = (oldData) => {
-        let data = deepClone(oldData);
-        return data.filter(item => (item['_isNew'] && item['_checked']));
-    }
-    /**
      * 根据key关联对应数据后校验
      *
      * @param {array} data 要关联数据
@@ -581,6 +571,24 @@ class Inline extends Component {
         data.forEach((_data, _index) => {
             _list.forEach((item, i) => {
                 if (_data['key'] == item['key']) {
+                    _list[i]['_validate'] = true;
+                }
+            });
+        });
+        return _list;
+    }
+    /**
+     * 根据id关联对应数据后校验
+     *
+     * @param {array} data 要关联数据
+     * @param {array} list 被关联数据
+     * @returns {array}
+     */
+    filterListId = (data, list) => {
+        let _list = list.slice();
+        data.forEach((_data, _index) => {
+            _list.forEach((item, i) => {
+                if (_data['id'] == item['id']) {
                     _list[i]['_validate'] = true;
                 }
             });
@@ -615,46 +623,83 @@ class Inline extends Component {
         return flag
     }
     /**
-     * 根据id关联对应数据后校验
+     * 过滤左侧check选中后的数据
      *
-     * @param {array} data 要关联数据
-     * @param {array} list 被关联数据
-     * @returns {array}
+     * @param {array} data 新增数据
+     * @param {array} list 数据
+     * @returns 选中后的数据
      */
-    filterListId = (data, list) => {
-        let _list = list.slice();
+    filterChecked = (data, list) => {
+        let result = [];
         data.forEach((_data, _index) => {
-            _list.forEach((item, i) => {
-                if (_data['id'] == item['id']) {
-                    _list[i]['_validate'] = true;
+            list.forEach((item) => {
+                if (_data['key'] == item['key'] && item['_checked']) {
+                    result.push(_data);
                 }
             });
         });
-        return _list;
+        return result;
     }
-
+    /**
+     * 过滤选择的数据根据ID关联
+     *
+     * @param {array} data 新增数据
+     * @param {array} selected 选择后的数据
+     * @returns
+     */
+    filterSelectedById = (data, selected) => {
+        let result = [];
+        data.forEach((_data, _index) => {
+            selected.forEach((item) => {
+                if (_data['id'] == item['id'] && item['_checked']) {
+                    _data['_checked'] = true;
+                    result.push(_data);
+                }
+            });
+        });
+        return result;
+    }
+    /**
+     * 过滤表格内的数据与左侧check同步数据根据id
+     *
+     * @param {array} data 数据
+     * @param {array} list 来源数据
+     * @returns 关联好的数据
+     */
+    filterSelectedListById = (data, list) => {
+        let result = [];
+        data.forEach((_data, _index) => {
+            list.forEach((item) => {
+                if (_data['id'] == item['id'] && item['_checked']) {
+                    _data['_checked'] = true;
+                    result.push(_data);
+                }
+            });
+        });
+        return result;
+    }
     /**
      * 保存
      */
     onClickSave = async () => {
+        let { status, list, selectData } = this.props;
         let data = deepClone(this.oldData);
-        let { status, list } = this.props;
         let _list = list.slice();
         switch (status) {
             case 'new':
                 //筛选新增的值
                 //筛选打过对号的
-                data = this.filterIsNew(data);
+                data = this.filterChecked(data, this.props.list);
                 //检查校验数据合法性
                 //查找对应的key关系来开启验证
                 _list = this.filterListKey(data, _list);
                 //开始校验actions
                 await actions.inline.updateState({ list: _list });
                 //检查是否验证通过
-                if (this.isVerifyData(this.filterIsNew(this.oldData))) {
-                    let vals = this.filterIsNew(this.oldData);
+                if (this.isVerifyData(this.filterChecked(deepClone(this.oldData), this.props.list))) {
+                    let vals = this.filterChecked(this.oldData, this.props.list);
                     if (vals.length == 0) {
-                        Info('请勾选数据后再保存');
+                        Info('请勾选数据后再新增');
                     } else {
                         let newResult = await actions.inline.adds(vals);
                         if (newResult) {
@@ -667,17 +712,18 @@ class Inline extends Component {
                 }
                 break;
             case 'edit':
-                //筛选新增的值
                 //筛选打过对号的
-                data = data.filter(item => (item['_checked']));
+                data = this.filterSelectedById(data, selectData);
+                //如果没有找到继续从左侧找check数据
+                data = data.length == 0 ? this.filterSelectedListById(this.oldData, _list) : data;
                 //检查校验数据合法性
-                //查找对应的key关系来开启验证
+                //查找对应的id关系来开启验证
                 _list = this.filterListId(data, _list);
                 await actions.inline.updateState({ list: _list });
                 //检查是否验证通过
                 if (this.isVerifyData(data)) {
                     if (data.length == 0) {
-                        Info('请勾选数据后再保存');
+                        Info('请勾选数据后再修改');
                     } else {
                         let editResult = await actions.inline.updates(data);
                         if (editResult) {
