@@ -18,7 +18,7 @@ import SearchArea from '../SearchArea';
 import Button from 'components/Button';
 
 // 封装的工具类
-import {deepClone, getSortMap} from "utils";
+import {deepClone, getHeight, getSortMap} from "utils";
 
 // grid样式
 import 'bee-complex-grid/build/Grid.css';
@@ -43,6 +43,11 @@ class Query extends Component {
 
     componentDidMount() {
         actions.query.loadList(this.props.queryParam); // 查询默认条件
+    }
+
+    componentWillMount() {
+        //计算表格滚动条高度
+        this.resetTableHeight(true);
     }
 
         /**
@@ -74,6 +79,11 @@ class Query extends Component {
     close = () => {
         this.setState({showModal: false});
     }
+
+    clearRowFilter = () => {
+        this.setState({filterable: false});
+    }
+
 
     /**
      *
@@ -229,6 +239,24 @@ class Query extends Component {
     export = () => {
         this.grid.exportExcel();
     }
+
+    /**
+     * 重置表格高度计算回调
+     *
+     * @param {Boolean} isopen 是否展开
+     */
+    resetTableHeight = (isopen) => {
+        let tableHeight = 0;
+        if (isopen) {
+            //展开的时候并且适配对应页面数值px
+            tableHeight = getHeight() - 470
+        } else {
+            //收起的时候并且适配对应页面数值px
+            tableHeight = getHeight() - 270
+        }
+        this.setState({ tableHeight });
+    }
+
 
     render() {
         const _this = this;
