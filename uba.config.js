@@ -137,6 +137,7 @@ entries.vendors = prodEntries.vendors = ['babel-polyfill'].concat(getVendors());
 
 glob.sync("./src/pages/**/app.js").forEach(path => {
   const chunk = path.split("./src/pages/")[1].split(".js")[0];
+
   entries[chunk] = [path, hotMiddlewareScript];
   chunks.push(chunk);
 });
