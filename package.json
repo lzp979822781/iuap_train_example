@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "start": "npm run dev",
-    "dev": "cross-env NODE_ENV=development uba server --chunks",
+    "dev": "cross-env NODE_ENV=development uba server --chunks --homepage=wbalone/pages/login/login.html",
     "test": "cross-env NODE_ENV=production uba server --chunks",
     "build": "cross-env NODE_ENV=production uba build",
     "ftp": "gulp ftp",
@@ -42,7 +42,7 @@
     "postcss-loader": "^3.0.0",
     "redux-logger": "^3.0.6",
     "style-loader": "^0.23.1",
-    "uba": "^2.3.11",
+    "uba": "^2.3.12",
     "url-loader": "^1.1.2",
     "webpack-bundle-analyzer": "^3.0.3",
     "webpack-hot-middleware": "^2.24.3"

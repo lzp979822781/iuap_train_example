@@ -7,12 +7,9 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CommonsChunkPlugin = require('webpack/lib/optimize/CommonsChunkPlugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-const pathUrl = ''; //http://127.0.0.1:8080 设置host，可选
+const pathUrl = ''; //http://127.0.0.1:8080 设置host，可选，可用于设置cdn加速路径
 const context = '/iuap_train_example';//工程节点名称
 const contentBase = './build' + context;//打包目录
-const staticConfig = {
-  folder: "dll"
-};
 
 
 let entries = {};
@@ -21,9 +18,6 @@ let prodEntries = {};
 let prodChunks = [];
 let htmlEntrys = [];
 
-const svrConfig = {
-  historyApiFallback: false
-};
 
 // 远程代理访问，可以配置多个代理服务：https://github.com/chimurai/http-proxy-middleware
 const proxyConfig = [
@@ -59,7 +53,6 @@ const globalEnvConfig = new webpack.DefinePlugin({
   'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
 })
 
-const MINIMIZE_FLAG = (process.env.NODE_ENV == "production") ? true : false;
 
 //提取package里的包
 function getVendors() {
@@ -286,7 +279,5 @@ glob.sync("./src/pages/**/index.html").forEach(path => {
 module.exports = {
   devConfig,
   prodConfig,
-  svrConfig,
-  proxyConfig,
-  staticConfig
+  proxyConfig
 };
