@@ -25,25 +25,25 @@ const proxyConfig = [
     enable: true,
     headers: {
       // 这是之前网页的地址，从中可以看到当前请求页面的链接。
-      "Referer": "http://10.170.192.155:8888"
+      "Referer": "http://10.190.252.42:80"
     },
     // context，如果不配置，默认就是代理全部。
     router: [
       '/wbalone', '/iuap-saas-message-center/', '/iuap-saas-filesystem-service/', '/eiap-plus/', '/newref/', '/print_service/', '/iuap-print/'
     ],
-    url: 'http://10.170.192.155:8888'
+    url: 'http://10.190.252.42:80'
   },
   {
     enable: true,
     headers: {
       // 这是之前网页的地址，从中可以看到当前请求页面的链接。
-      "Referer": "http://10.170.192.155:8888"
+      "Referer": "http://10.190.252.42:80"
     },
     // context，如果不配置，默认就是代理全部。
     router: [
       '/iuap_walsin_demo'
     ],
-    url: 'http://10.170.192.155:8888'
+    url: 'http://10.190.252.42:80'
   }
   ];
 
