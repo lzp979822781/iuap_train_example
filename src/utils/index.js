@@ -571,7 +571,7 @@ export function getHeight() {
  * @returns {Array} 返回排序属性
  */
 export function getSortMap(sortParam){
-    // 升排序
+    // 升排序,排序的数组中每一项数据有一个字段orderNum,表示排序的优先级
     const orderSortParam = sortParam.sort((a, b) => {
         return a["orderNum"] - b["orderNum"];
     })
