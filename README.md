@@ -4,11 +4,19 @@
 
 > 需要提前安装全局的 Node 环境
 
-默认访问地址：http://127.0.0.1:3000/fe/allowances#/
+默认访问地址：
+```
+单表查询: http://127.0.0.1:3000/iuap_train_example/query#/
+行内编辑: http://127.0.0.1:3000/iuap_train_example/inline#/
+弹框编辑: http://127.0.0.1:3000/iuap_train_example/popup#/
+多功能树: http://127.0.0.1:3000/iuap_train_example/tree#/
+一主一子: http://127.0.0.1:3000/iuap_train_example/one#/
+一主多子: http://127.0.0.1:3000/iuap_train_example/many#/
+```
 
 ```
-$ git clone http://git.yonyou.com/iuap_walsin/fe.git
-$ cd fe
+$ git clone git@github.com:lzp979822781/iuap_train_example.git
+$ cd iuap_train_example
 $ npm i
 $ npm run dev
 ```
