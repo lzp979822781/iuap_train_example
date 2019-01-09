@@ -257,7 +257,6 @@ class Query extends Component {
         this.setState({ tableHeight });
     }
 
-
     render() {
         const _this = this;
         const {queryObj, showLoading, queryParam} = _this.props;

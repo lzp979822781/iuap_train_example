@@ -39,7 +39,7 @@ export default {
                 ...state,
                 ...data
             };
-        }
+        },
     },
     effects: {
         /**
