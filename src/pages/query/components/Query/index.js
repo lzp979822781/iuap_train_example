@@ -324,7 +324,7 @@ class Query extends Component {
                 exportKey: 'sexEnumValue',
                 width: 120,
                 filterType: "dropdown",
-                // filterDropdown: "true", //条件的下拉是否显示（string，number）
+                filterDropdown: "hide", //过滤条件是否显示，过滤条件指显示大于、等于等condition
                 filterDropdownAuto: "manual", //是否自动和手动设置 filterDropdownData 属性
                 filterDropdownData: [{key: "男", value: "1"}, {key: "女", value: "0"}],
                 render: (text, record, index) => {
