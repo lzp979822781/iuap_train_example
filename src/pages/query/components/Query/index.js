@@ -515,7 +515,7 @@ class Query extends Component {
                         filterable={filterable}//是否开启过滤数据功能
                         onFilterChange={_this.onFilterChange}  // 触发过滤输入操作以及下拉条件的回调
                         onFilterClear={_this.onFilterClear} //清除过滤条件的回调函数，回调参数为清空的字段
-                        afterRowFilter={_this.afterRowFilter} //控制栏位的显示/隐藏
+                        afterRowFilter={_this.afterRowFilter} //点击行过滤时触发的callback function
                         sort={sortObj} //排序属性设置
 
                         scroll={{y: tableHeight}}
