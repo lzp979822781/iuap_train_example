@@ -30,6 +30,8 @@ import './index.less';
 
 const {Item} = Menu;
 const format = "YYYY-MM-DD HH:mm:ss";
+const beginFormat = "YYYY-MM-DD 00:00:00";
+const endFormat = "YYYY-MM-DD 23:59:59";
 
 class Query extends Component {
     constructor(props) {
