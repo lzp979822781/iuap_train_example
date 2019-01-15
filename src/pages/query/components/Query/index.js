@@ -483,7 +483,7 @@ class Query extends Component {
         //排序属性设置
         const sortObj = {  
             mode: 'multiple',
-            backSource: false,
+            backSource: true,
             sortFun: _this.sortFun
         }
 
