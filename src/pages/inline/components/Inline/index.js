@@ -378,7 +378,7 @@ class Inline extends Component {
      * @param {number} index 位置
      */
     onValidate = (field, flag, index) => {
-        //只要是修改过就启用校验
+        //只要是修改过就启用校验,flag为错误信息数组
         if (this.oldData.length != 0) {
             this.oldData[index][`_${field}Validate`] = (flag == null);
         }
