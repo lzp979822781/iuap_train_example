@@ -97,6 +97,7 @@ class TextField extends Component {
         }
         let validator = new schema(descriptor);
         validator.validate({ [field]: value }, (errors, fields) => {
+            console.log('fields',fields);
             if (errors) {
                 this.setState({
                     error: true

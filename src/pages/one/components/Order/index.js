@@ -259,7 +259,9 @@ class Order extends Component {
         if (type === 1) { // 确定
             const {selectData, searchId} = this.state;
             if (this.clearOldData()) {
-                const res = await actions.masterDetailOne.delOrderDetail(selectData);
+                let delData = selectData.filter((item) => item.id);
+                console.log('delData',delData);
+                const res = await actions.masterDetailOne.delOrderDetail(delData);
                 const {data = {}} = res;
                 const {success} = data;
                 if (success === "success") {
@@ -276,10 +278,12 @@ class Order extends Component {
      */
     clearOldData = () => {
         const queryDetailObj = deepClone(this.props.queryDetailObj);
-        let {list} = queryDetailObj;
+        console.log('this.oldData',this.oldData);
+        // 新增页面，子表onChange事件中只把数据同步到了oldData中，如果oldData不为空，那么oldData为最新数据列表
+        let  list  = deepClone(this.oldData.length ? this.oldData : this.props.queryDetailObj.list);
         const {selectData} = this.state;
         for (const elementSelect of selectData) {
-            for (const [indexOld, elementOld] of list.entries()) {
+            /* for (const [indexOld, elementOld] of list.entries()) {
                 // 判断当前数据是否来自后端，如果是来自后端，后端删除,
                 if (elementSelect.id && elementOld.id === elementSelect.id) {
                     return true;
@@ -287,6 +291,15 @@ class Order extends Component {
                 // 判断当前数据是否新增，如果是新增，前端删除
                 if (elementSelect.key && elementOld.key === elementSelect.key) {
                     list.splice(indexOld, 1);
+                }
+            } */
+            for(let i = list.length-1; i >= 0; i-- ) {
+                if(elementSelect['id'] && list[i].id === elementSelect['id']) {
+                    return true;
+                }
+
+                if(elementSelect.key && list[i].key === elementSelect.key) {
+                    list.splice(i, 1);
                 }
             }
         }
@@ -307,6 +320,7 @@ class Order extends Component {
     async confirmGoBack(type) {
         this.setState({showPopBackVisible: false});
         if (type === 1) { // 确定
+            // 点击弹出框确定直接返回，取消则直接关闭,clearQuery退出时清空表单字段，防止新增、编辑、查看数据错乱
             this.clearQuery();
             actions.routing.replace({pathname: '/'});
         }
@@ -332,6 +346,7 @@ class Order extends Component {
             }
 
         } else {
+            // 新增、编辑状态下点击返回要给出弹出提示框
             this.setState({showPopBackVisible: true});
         }
     }
@@ -584,7 +599,7 @@ class Order extends Component {
      */
     onClickToBPM = (rowData) => {
         const searchObj = queryString.parse(this.props.location.search);
-        let {from} = searchObj;
+        // let {from} = searchObj;
         actions.routing.push({
             pathname: '/bpm-chart',
             search: `?id=${rowData.id}`

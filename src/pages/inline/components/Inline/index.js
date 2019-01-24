@@ -561,9 +561,9 @@ class Inline extends Component {
 
     /**
      * 根据key关联对应数据后校验
-     *
-     * @param {array} data 要关联数据
-     * @param {array} list 被关联数据
+     * @description 将列表中新增选中的数据中_validate字段设为true开启校验，返回添加_validate字段后列表数据
+     * @param {array} data 要关联数据、新增数据中选中的数据
+     * @param {array} list 被关联数据、列表所有数据
      * @returns
      */
     filterListKey = (data, list) => {
@@ -603,13 +603,14 @@ class Inline extends Component {
      */
     isVerifyData = (data) => {
         let flag = true;
-        let pattern = /Validate\b/;//校验的正则结尾
+        let pattern = /Validate\b/;//校验的正则结尾,检查所有已Validate结尾的字段
         data.forEach((item, index) => {
             let keys = Object.keys(item);
             //如果标准为false直接不参与计算说明已经出现了错误
             if (flag) {
                 for (let i = 0; i < keys.length; i++) {
                     if (pattern.test(keys[i])) {
+                        // 如果带有Validate字段的值为true空，将flag的值置为false证明校验不通过
                         if (data[index][keys[i]]) {
                             flag = true;
                         } else {
@@ -623,10 +624,10 @@ class Inline extends Component {
         return flag
     }
     /**
-     * 过滤左侧check选中后的数据
+     * 过滤左侧新增数据中check选中后的数据
      *
      * @param {array} data 新增数据
-     * @param {array} list 数据
+     * @param {array} list 列表数据
      * @returns 选中后的数据
      */
     filterChecked = (data, list) => {
@@ -649,6 +650,7 @@ class Inline extends Component {
      */
     filterSelectedById = (data, selected) => {
         let result = [];
+        // data为新增的数据、list为所有数据、筛选新增中选中的数据
         data.forEach((_data, _index) => {
             selected.forEach((item) => {
                 if (_data['id'] == item['id'] && item['_checked']) {
@@ -693,10 +695,13 @@ class Inline extends Component {
                 //检查校验数据合法性
                 //查找对应的key关系来开启验证
                 _list = this.filterListKey(data, _list);
-                //开始校验actions
+                //开始校验actions,_list添加了_validate校验标识
                 await actions.inline.updateState({ list: _list });
+                // 只要检测到list中的数据含有_validate字段并且为true开启检验
+                let newData = this.filterChecked(deepClone(this.oldData), this.props.list);
                 //检查是否验证通过
-                if (this.isVerifyData(this.filterChecked(deepClone(this.oldData), this.props.list))) {
+                if (this.isVerifyData(newData)) {
+                    // 如果检验通过,做如下逻辑处理，检验失败
                     let vals = this.filterChecked(this.oldData, this.props.list);
                     if (vals.length == 0) {
                         Info('请勾选数据后再新增');
@@ -712,13 +717,19 @@ class Inline extends Component {
                 }
                 break;
             case 'edit':
-                //筛选打过对号的
+                /*  
+                    筛选打过对号的,此时的this.oldData保存是设置完编辑状态的列表数据，在编辑事件中设置
+                    选中状态字段在selectData字段中保存,需要以this.oldData数据为基础，通过selectData中_checked
+                    字段后的一份新数据
+                */
                 data = this.filterSelectedById(data, selectData);
-                //如果没有找到继续从左侧找check数据
+                //如果没有找到继续从左侧找check数据,兼容操作数据而进行勾选的情况
                 data = data.length == 0 ? this.filterSelectedListById(this.oldData, _list) : data;
                 //检查校验数据合法性
-                //查找对应的id关系来开启验证
+                //查找对应的id关系来开启验证,通过对比data和_list,将data中的勾选的数据状态_checked为true的数据将data中
+                // 相同id数据中的_validate置为true
                 _list = this.filterListId(data, _list);
+                // 此时更新就会校验
                 await actions.inline.updateState({ list: _list });
                 //检查是否验证通过
                 if (this.isVerifyData(data)) {

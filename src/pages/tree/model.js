@@ -69,17 +69,20 @@ export default {
                 content = res && res.content || [];
             let cacheContent = deepClone(getState().walsinTree.content);
             // 根据当前树数据是否为空进行不同的处理，因为是懒加载，所以每次返回均为当前节点数据
-            if(cacheContent.length === 0) {
-                // 当前树数据为空，直接进行展示
-                handledContent = deepClone(content);
-            } else {
-                // 如果当前树数据不为空则进行添加
-                handledContent = addChild(cacheContent, content);
+            let addArrLen = content.length;
+            if(addArrLen) {
+                if(cacheContent.length === 0) {
+                    // 当前树数据为空，直接进行展示
+                    handledContent = deepClone(content);
+                } else {
+                    // 如果当前树数据不为空则进行添加
+                    handledContent = addChild(cacheContent, content);
+                }
+                
+                actions.walsinTree.updateState({
+                    content : handledContent,
+                })
             }
-            
-            actions.walsinTree.updateState({
-                content : handledContent,
-            })
 
         },
         

@@ -211,9 +211,7 @@ export function exportExcelPost(url, data) {
 export function addChild(parentArray = [], childArray = []) {
 
     let parentLen = parentArray.length;
-    if (parentLen == 0 || childArray.length == 0) {
-        return [];
-    }
+
     let parentId = childArray[0].parentId;
 
     for (let i = 0; i < parentLen; i++) {

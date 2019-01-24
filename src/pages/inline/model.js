@@ -125,6 +125,7 @@ export default {
          */
         resetData(status, getState) {
             let cacheData = getState().inline.cacheData.slice();
+            console.log("getState", getState());
             cacheData.map(item => delete item.edit);
             cacheData.map(item => delete item._edit);
             if (status) {

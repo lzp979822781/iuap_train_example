@@ -149,6 +149,7 @@ export default class One extends Component {
         this.grid.exportExcel();
     }
 
+    // 主表column
     orderColumn = [
         {
             title: "编号",
@@ -218,6 +219,7 @@ export default class One extends Component {
         }
     ];
 
+    // 子表column
     detailColumn = [
         {
             title: "物料名称",
@@ -346,7 +348,7 @@ export default class One extends Component {
                 <Header title='B2 一主一子示例 '/>
                 <SearchArea orderObj={orderObj}/>
                 <div className='table-header'>
-                    <ButtonRoleGroup funcCode="masterdetail-one">
+                    {/* <ButtonRoleGroup funcCode="masterdetail-one"> */}
                         <Button iconType="uf-plus"
                                 className="ml8"
                                 role="add"
@@ -411,7 +413,7 @@ export default class One extends Component {
                             <Button className="ml8" iconType="uf-back" size='sm' colors="primary"
                                 disabled={recallForbid}>收回</Button>
                         </BpmButtonRecall>
-                    </ButtonRoleGroup>
+                    {/* </ButtonRoleGroup> */}
                 </div>
                 <Grid
                     ref={(el) => this.grid = el}
