@@ -237,7 +237,7 @@ class Index extends Component {
   };
 
   /**
-   * 选则模板
+   * 选择模板
    *
    * @param {*} value
    */
@@ -252,9 +252,7 @@ class Index extends Component {
           pageSize : 25
         },
         whereParams :[],
-        orderParams : {
-            orderParamsList : []
-        }
+        sortMap: []
       }
     };
 
