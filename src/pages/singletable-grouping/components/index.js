@@ -20,7 +20,7 @@ import './index.less';
 const FormItem = Form.FormItem;
 const { Option } = Select;
 const groupItem = [
-    { 'value_cn': '所属部门', 'value_en': 'dept' },
+    { 'value_cn': '性别', 'value_en': 'sex' },
     { 'value_cn': '补贴类别', 'value_en': 'allowanceType' }
 ];
 
@@ -143,8 +143,16 @@ class SingleTableGrouping extends Component {
                 key: "code",
                 width: 120,
                 render: (value, record, index) => {
+                    let {queryParam: {groupParams}} = this.props;
+                    let str  = ""
+                    if(Array.isArray(groupParams) && groupParams.length) {
+                        for(let item of groupParams) {
+                            let temp = record[`${item}EnumValue`];
+                            str += `【${temp}】 `;
+                        }
+                    }
                     let obj = {
-                        children: `【${record.name}】 \t 总人数：${record.count}人 \t 金额：${record.sum}`,
+                        children: `${str} \t 总记录条数：${record.idCount}人 \t 金额：${record.allowanceActualSum}`,
                         props: {
                             colSpan: 17
                         }
@@ -331,6 +339,7 @@ class SingleTableGrouping extends Component {
      */
     expandedRowRender = (record, index, indent) => {
         let { subTableAllData, subTableAllPaging, subTableAllLoading } = this.props;
+        console.log('subTableAllPaging', subTableAllPaging);
         let { pageParams: { pageIndex, total, totalPages } } = subTableAllPaging[record.key];
         return (<div>
             <Table
@@ -380,12 +389,12 @@ class SingleTableGrouping extends Component {
 
         for (let key in values) {
             if (key == "group") {
-                groupArray = values.group
+                groupArray = typeof values.group !== 'undefined' && values.group || [];
             } else if (values[key]) {
                 resultArray.push({
                     key,
                     value: values[key],
-                    condition: "eq"
+                    condition: "EQ"
                 })
             }
         }
@@ -445,7 +454,7 @@ class SingleTableGrouping extends Component {
         let tableAttr = {}
         tableAttr['columns'] = this.masterNornalColumn;
         tableAttr['data'] = masterTableList;
-        if (groupParams['groupList'] && groupParams['groupList'].length > 0) {
+        if (groupParams && groupParams.length) {
             tableAttr['columns'] = this.masterColumn;
             tableAttr['expandedRowRender'] = this.expandedRowRender;
             tableAttr['onExpand'] = this.getData;
