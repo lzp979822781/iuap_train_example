@@ -12,8 +12,7 @@ const URL = {
  * 获取聚合主列表
  */
 export const loadMasterTableList = (data = {}) => {
-    // 复制请求参数，
-
+/*     // 复制请求参数，
     let commitData = {},
         {groupParams, whereParams, sortMap} = data;
     if(!groupParams.length) {
@@ -23,10 +22,11 @@ export const loadMasterTableList = (data = {}) => {
         })
     } else {
         commitData = data
-    }
+    } */
+
     return request(URL.GET_LIST, {
         method: "post",
-        data: commitData,
+        data: data,
         param: data.pageParams
     });
 }
@@ -45,9 +45,13 @@ export const loadSubTableList = (data = {}) => {
  * 获得分组数据
  */
 export const loadGroupTableList = (data = {}) => {
+    let result = deepClone(data);
+    let pageParams = deepClone(result.pageParams);
+    delete result.pageParams;
     return request(URL.GET_LIST_NEW, {
         method: "post",
-        data
+        data: result,
+        pageParams
     });
 }
 

@@ -32,15 +32,6 @@ export default {
                 pageIndex: 0,
                 pageSize: 10
             },
-            /* groupParams: {
-                groupList: []
-            },
-            whereParams: {
-                whereParamsList: []
-            },
-            orderParams: {
-                orderParamsList: []
-            }, */
             groupParams: [],
             whereParams: [],
             sortMap: []
@@ -91,8 +82,7 @@ export default {
          */
         async loadGroupTableList(param, getState) {
             actions.grouping.updateState({ masterTableLoading: true, masterTableList: [] });
-            let {result} = processData(await api.loadGroupTableList(param));
-            const {data:res}=result;
+            let res = processData(await api.loadGroupTableList(param));
             actions.grouping.updateState({ masterTableLoading: false, queryParam: param });
             if (res) {
                 actions.grouping.updateState({
@@ -127,16 +117,11 @@ export default {
                             pageIndex: 0,
                             pageSize: 10
                         },
-                        groupParams: {
-                            groupList: []
-                        },
-                        whereParams: {
-                            whereParamsList: []
-                        },
-                        orderParams: {
-                            orderParamsList: []
-                        }
+                        groupParams: [],
+                        whereParams: [],
+                        sortMap: []
                     },
+
                     pageParams: {
                         pageIndex: 0,
                         total: 0,
@@ -144,20 +129,22 @@ export default {
                     }
                 }
             }
-            _subTableAllPaging[param.record.key].paging.whereParams.whereParamsList = Array.from(getState().grouping.queryParam.groupParams.groupList, (item, i) => {
+            _subTableAllPaging[param.record.key].paging.whereParams = Array.from(getState().grouping.queryParam.groupParams, (item, i) => {
                 return {
                     "key": item,
-                    "value": conditionConvertValue(param.record['value'])[i],//TO DO: 处理搜索条件拆分
-                    "condition": "eq"
+                    // "value": conditionConvertValue(param.record['value'])[i],//TO DO: 处理搜索条件拆分
+                    "value": param.record[item],//TO DO: 处理搜索条件拆分
+                    "condition": "EQ"
                 }
             })
+            console.log('_subTableAllPaging',_subTableAllPaging);
             //与最上方的搜索条件进行组合
-            let _pubParamsList = getState().grouping.queryParam.whereParams.whereParamsList.slice();
-            _subTableAllPaging[param.record.key].paging.whereParams.whereParamsList = _pubParamsList.concat(_subTableAllPaging[param.record.key].paging.whereParams.whereParamsList);
+            let _pubParamsList = getState().grouping.queryParam.whereParams.slice();
+            console.log('_pubParamsList',_pubParamsList);
+            _subTableAllPaging[param.record.key].paging.whereParams = _pubParamsList.concat(_subTableAllPaging[param.record.key].paging.whereParams);
 
-            actions.grouping.updateState({ subTableAllLoading: _subTableAllLoading, subTableAllPaging: _subTableAllPaging });
-            let {result} = processData(await api.loadSubTableList(_subTableAllPaging[param.record.key]['paging']));//返回数据
-            const {data:res}=result;
+            await actions.grouping.updateState({ subTableAllLoading: _subTableAllLoading, subTableAllPaging: _subTableAllPaging });
+            let res = processData(await api.loadSubTableList(_subTableAllPaging[param.record.key]['paging']));//返回数据
             let _subTableAllData = getState().grouping.subTableAllData.slice();
             if (res) {
                 _subTableAllData[param.record.key] = resultDataAdditional(res.content);//处理缺少key的数据，保存store
